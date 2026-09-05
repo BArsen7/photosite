@@ -40,6 +40,8 @@ export default function FeaturedProjects() {
                   src={p.cover}
                   alt={`${p.title} — обложка проекта`}
                   ratio="3/4"
+                  /* 3 колонки от md (768px), до того — одна */
+                  sizes="(min-width: 768px) 33vw, 100vw"
                   imgClassName="transition-transform duration-700 ease-out group-hover:scale-[1.05]"
                 />
 

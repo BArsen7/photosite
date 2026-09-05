@@ -6,11 +6,16 @@ import { useState } from "react";
  * placeholder="blur" → CSS blur-up: кадр проявляетс из размытия, как в кювете проявителя.
  * ratio держит «полку» в сетке до загрузки (CLS = 0).
  */
+/* Подсказка браузеру, какую ширину займёт изображение на разных экранах.
+   Дефолт рассчитан под masonry-сетку: 3 колонки → 2 → 1. */
+const DEFAULT_SIZES = "(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw";
+
 export default function Photo({
   src,
   alt,
   ratio,
   priority = false,
+  sizes = DEFAULT_SIZES,
   className = "",
   imgClassName = "",
 }: {
@@ -18,6 +23,7 @@ export default function Photo({
   alt: string;
   ratio: string;
   priority?: boolean;
+  sizes?: string;
   className?: string;
   imgClassName?: string;
 }) {
@@ -32,6 +38,7 @@ export default function Photo({
       <img
         src={src}
         alt={alt}
+        sizes={sizes}
         loading={priority ? "eager" : "lazy"}
         decoding="async"
         // @ts-expect-error — fetchpriority пока отсутствует в типах React 18

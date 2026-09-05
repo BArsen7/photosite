@@ -1,8 +1,8 @@
 import { PHOTOS } from "../data/photos";
-import { getSupabaseBrowser } from "./supabase/browser";
+import { loadSupabase } from "./supabase/browser";
 
-/** Единый browser-клиент Supabase (см. lib/supabase/browser.ts). */
-export const supabase = getSupabaseBrowser();
+/* Клиент инициализируется лениво внутри каждой функции — SDK не попадает
+   в стартовый чанк и подгружается только при реальном запросе к данным. */
 
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -72,6 +72,7 @@ export interface PortfolioData {
  * сети/RLS) возвращает локальный датасет — сайт остаётся живым.
  */
 export async function fetchPortfolio(): Promise<PortfolioData> {
+  const supabase = await loadSupabase();
   if (supabase) {
     try {
       const [catRes, projRes, photoRes] = await Promise.all([
@@ -211,6 +212,7 @@ export function storagePathFromUrl(imageUrl: string): string | null {
 
 /** Удаляет файл из Supabase Storage (если он там лежит). */
 async function removeStoredFile(imageUrl: string | null | undefined): Promise<void> {
+  const supabase = await loadSupabase();
   if (!supabase || !imageUrl) return;
   const path = storagePathFromUrl(imageUrl);
   if (!path) return;
@@ -226,6 +228,7 @@ export async function deletePhotoRecord(photo: {
   id: string;
   image_url: string | null;
 }): Promise<void> {
+  const supabase = await loadSupabase();
   if (supabase) {
     await removeStoredFile(photo.image_url);
     const { error } = await supabase.from("photos").delete().eq("id", photo.id);
@@ -240,6 +243,7 @@ export async function deleteProjectRecord(
   project: DbProject,
   photos: DbPhoto[],
 ): Promise<void> {
+  const supabase = await loadSupabase();
   if (supabase) {
     const owned = photos.filter((p) => p.project_id === project.id);
     await Promise.all(owned.map((p) => removeStoredFile(p.image_url)));
@@ -257,6 +261,7 @@ export async function updatePhotoRecord(
   id: string,
   patch: Partial<DbPhoto>,
 ): Promise<void> {
+  const supabase = await loadSupabase();
   if (supabase) {
     const { error } = await supabase.from("photos").update(patch).eq("id", id);
     if (error) throw new Error(error.message);
@@ -276,6 +281,7 @@ export interface Inquiry {
 
 /** Отправка заявки: insert в таблицу `inquiries`, в демо — имитация. */
 export async function submitInquiry(payload: Inquiry): Promise<void> {
+  const supabase = await loadSupabase();
   if (supabase) {
     try {
       const { error } = await supabase.from("inquiries").insert(payload);

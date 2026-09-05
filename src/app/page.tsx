@@ -3,9 +3,18 @@ import Hero from "../components/Hero";
 import FeaturedProjects from "../components/FeaturedProjects";
 import { Reveal } from "../lib/motion";
 import { ArrowUpRight } from "../components/Icons";
+import { usePageMeta, SITE } from "../lib/meta";
 
 /** Аналог app/page.tsx — главная: hero + избранные проекты + финальный призыв. */
 export default function HomePage() {
+  /* Аналог export const metadata / generateMetadata */
+  usePageMeta({
+    title: null,
+    description:
+      "Artem Volkov — фотограф. Street, портрет, архитектура, натюрморт и пейзаж. Плёнка и средний формат, Москва и не только.",
+    image: SITE.image,
+  });
+
   return (
     <>
       <Hero />

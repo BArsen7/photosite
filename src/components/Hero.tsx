@@ -13,6 +13,11 @@ export default function Hero() {
       <img
         src={HERO_IMAGE}
         alt="Ночная улица в дождь, фигура с прозрачным зонтом"
+        sizes="100vw"
+        loading="eager"
+        decoding="async"
+        // @ts-expect-error — fetchpriority пока отсутствует в типах React 18
+        fetchpriority="high"
         className="anim-kenburns absolute inset-0 h-full w-full object-cover"
       />
 

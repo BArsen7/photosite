@@ -9,6 +9,7 @@ import Photo from "../components/Photo";
 import Lightbox, { type LightboxItem } from "../components/Lightbox";
 import { FrameCorners, ChevronLeft, PinIcon, ArrowUpRight } from "../components/Icons";
 import { LineReveal, Reveal } from "../lib/motion";
+import { usePageMeta } from "../lib/meta";
 import {
   fetchPortfolio,
   projectSlug,
@@ -91,6 +92,14 @@ export default function ProjectPage() {
   }, [data, project]);
 
   const exif = useMemo(() => uniqueExif(photos), [photos]);
+
+  /* Аналог generateMetadata({ params }): метаданные строятся из данных проекта.
+     Пока данные грузятся — title остаётся базовым, после загрузки обновится. */
+  usePageMeta({
+    title: project?.title ? `${project.title} — фотопроект` : "Фотопроект",
+    description: project?.description,
+    image: project?.cover_image_url ?? photos[0]?.image_url,
+  });
 
   const items: LightboxItem[] = useMemo(
     () =>
@@ -246,6 +255,8 @@ export default function ProjectPage() {
                         src={ph.image_url}
                         alt={`${project.title} — кадр ${i + 1}`}
                         ratio={ratio}
+                        /* Галерея занимает 8 из 12 колонок на десктопе */
+                        sizes="(min-width: 1024px) 64vw, 100vw"
                         imgClassName="transition-transform duration-700 ease-out group-hover:scale-[1.035]"
                       />
                     </div>
@@ -328,7 +339,14 @@ function ProjectNavLink({
           style={align === "left" ? { right: "8%" } : { left: "8%" }}
           aria-hidden="true"
         >
-          <img src={p.cover_image_url} alt="" className="block h-52 w-full object-cover" />
+          <img
+            src={p.cover_image_url}
+            alt=""
+            sizes="176px"
+            loading="lazy"
+            decoding="async"
+            className="block h-52 w-full object-cover"
+          />
         </span>
       )}
 

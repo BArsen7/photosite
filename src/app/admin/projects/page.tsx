@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { PageHead, Banner, FieldLabel, inputCls } from "../ui";
 import { PlusIcon, CloseIcon, ChevronRight } from "../../../components/Icons";
-import { fetchPortfolio, supabase, slugify, type DbProject, type PortfolioData } from "../../../lib/api";
-import { isSupabaseConfigured } from "../../../lib/supabase/browser";
+import { fetchPortfolio, slugify, type DbProject, type PortfolioData } from "../../../lib/api";
+import { isSupabaseConfigured, loadSupabase } from "../../../lib/supabase/browser";
 import { useLockBody } from "../../../lib/motion";
 
 interface ProjectForm {
@@ -121,6 +121,7 @@ export default function AdminProjectsPage() {
       });
     };
 
+    const supabase = await loadSupabase();
     if (supabase) {
       const res =
         editing === "new"
@@ -147,8 +148,9 @@ export default function AdminProjectsPage() {
     if (!deleting) return;
     setBusy(true);
     setError(null);
-    if (supabase) {
-      const { error: delErr } = await supabase.from("projects").delete().eq("id", deleting.id);
+    const supabaseDel = await loadSupabase();
+    if (supabaseDel) {
+      const { error: delErr } = await supabaseDel.from("projects").delete().eq("id", deleting.id);
       setBusy(false);
       if (delErr) {
         setError(`Supabase: ${delErr.message} (кадры каскадно защищены FK)`);

@@ -17,6 +17,8 @@ export default function Contact() {
   const [status, setStatus] = useState<Status>("idle");
   const [errors, setErrors] = useState<Errors>({});
   const [form, setForm] = useState({ name: "", email: "", type: "Портрет", message: "" });
+  /* Ханипот: скрытое поле-ловушка для ботов (человек его не видит и не заполняет) */
+  const [honeypot, setHoneypot] = useState("");
 
   const set = (k: keyof typeof form) => (e: { target: { value: string } }) => {
     setForm((f) => ({ ...f, [k]: e.target.value }));
@@ -25,15 +27,26 @@ export default function Contact() {
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    /* Бот попался в ловушку: показываем «успех», но заявку никуда не пишем */
+    if (honeypot.trim()) {
+      setStatus("done");
+      return;
+    }
     const next: Errors = {};
     if (form.name.trim().length < 2) next.name = "Как к вам обращаться?";
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(form.email)) next.email = "Похоже, в email опечатка";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(form.email.trim())) next.email = "Похоже, в email опечатка";
     if (form.message.trim().length < 10) next.message = "Расскажите чуть подробнее — от 10 символов";
     setErrors(next);
     if (Object.keys(next).length) return;
 
     setStatus("sending");
-    await submitInquiry(form); // Supabase `inquiries` или имитация
+    /* trim + lowercase — нормализуем данные до записи в `inquiries` */
+    await submitInquiry({
+      name: form.name.trim(),
+      email: form.email.trim().toLowerCase(),
+      type: form.type,
+      message: form.message.trim(),
+    });
     setStatus("done");
   };
 
@@ -102,7 +115,18 @@ export default function Contact() {
               </button>
             </div>
           ) : (
-            <form onSubmit={onSubmit} noValidate className="border border-line bg-panel/60 p-6 md:p-8">
+            <form onSubmit={onSubmit} noValidate className="relative border border-line bg-panel/60 p-6 md:p-8">
+              {/* Ловушка для ботов: вынесена за экран, скрыта от скринридеров */}
+              <input
+                type="text"
+                name="website"
+                value={honeypot}
+                onChange={(e) => setHoneypot(e.target.value)}
+                tabIndex={-1}
+                autoComplete="off"
+                aria-hidden="true"
+                className="absolute -left-[9999px] h-0 w-0 opacity-0"
+              />
               <div className="grid gap-7 sm:grid-cols-2">
                 <div>
                   <label htmlFor="cf-name" className={labelCls}>Имя *</label>
@@ -110,6 +134,7 @@ export default function Contact() {
                     id="cf-name"
                     value={form.name}
                     onChange={set("name")}
+                    maxLength={80}
                     placeholder="Как вас зовут"
                     className={`${inputCls} ${errors.name ? "border-err" : ""}`}
                   />
@@ -122,6 +147,7 @@ export default function Contact() {
                     type="email"
                     value={form.email}
                     onChange={set("email")}
+                    maxLength={120}
                     placeholder="you@example.com"
                     className={`${inputCls} ${errors.email ? "border-err" : ""}`}
                   />
@@ -148,10 +174,20 @@ export default function Contact() {
                   rows={4}
                   value={form.message}
                   onChange={set("message")}
+                  maxLength={2000}
                   placeholder="Что, где и когда снимаем? Пара слов о задаче."
                   className={`${inputCls} resize-none ${errors.message ? "border-err" : ""}`}
                 />
-                {errors.message && <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.15em] text-err">{errors.message}</p>}
+                <div className="mt-2 flex items-baseline justify-between gap-4">
+                  {errors.message ? (
+                    <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-err">{errors.message}</p>
+                  ) : (
+                    <span />
+                  )}
+                  <p className={`font-mono text-[9px] tracking-[0.15em] transition-colors ${form.message.length > 1800 ? "text-acc" : "text-mut/50"}`}>
+                    {form.message.length} / 2000
+                  </p>
+                </div>
               </div>
 
               <button

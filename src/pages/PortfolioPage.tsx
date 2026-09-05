@@ -7,8 +7,9 @@ import { useEffect, useMemo, useState } from "react";
 import Photo from "../components/Photo";
 import Lightbox, { type LightboxItem } from "../components/Lightbox";
 import { FrameCorners } from "../components/Icons";
-import { LineReveal } from "../lib/motion";
+import { LineReveal, Reveal } from "../lib/motion";
 import { fetchPortfolio, type DbProject, type PortfolioData } from "../lib/api";
+import { usePageMeta } from "../lib/meta";
 
 const FILTER_ALL = "all";
 const SKELETON_RATIOS = ["3/4", "1/1", "4/5", "16/10", "3/4", "4/5"];
@@ -104,6 +105,14 @@ export default function PortfolioPage() {
       : (data?.categories.find((c) => c.slug === active)?.name ?? "All");
   const pct = sortedPhotos.length ? Math.round((visible.length / sortedPhotos.length) * 100) : 0;
 
+  /* Аналог generateMetadata: метаданные страницы портфолио */
+  usePageMeta({
+    title: "Portfolio",
+    description:
+      "Все работы Артёма Волкова: стрит, портреты, архитектура, натюрморт и пейзаж. Фильтры по жанрам, EXIF каждого кадра.",
+    image: sortedPhotos[0]?.image_url,
+  });
+
   return (
     <div className="pb-24 pt-24 md:pt-28">
       {/* Шапка страницы */}
@@ -197,10 +206,11 @@ export default function PortfolioPage() {
               const ratio = ph.width && ph.height ? `${ph.width}/${ph.height}` : "4/5";
               return (
                 /* 3. Карточка: scale-105 на фото + появление названия проекта */
+                /* Плавное появление при скролле (IntersectionObserver внутри Reveal);
+                   небольшая лесенка задержек по остатку от 6 — волна по колонкам */
+                <Reveal key={ph.id} delay={(i % 6) * 60} className="mb-4 break-inside-avoid">
                 <figure
-                  key={ph.id}
-                  className="fadeup group relative mb-4 break-inside-avoid outline-none"
-                  style={{ animationDelay: `${Math.min(i, 10) * 45}ms` }}
+                  className="group relative outline-none"
                   tabIndex={0}
                   role="button"
                   aria-label={`Открыть «${proj?.title ?? "кадр"}»`}
@@ -244,6 +254,7 @@ export default function PortfolioPage() {
                     </p>
                   </figcaption>
                 </figure>
+                </Reveal>
               );
             })}
           </div>

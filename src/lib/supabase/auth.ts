@@ -1,4 +1,4 @@
-import { getSupabaseBrowser, isSupabaseConfigured } from "./browser";
+import { loadSupabase } from "./browser";
 
 /** Сессия администратора: из Supabase Auth либо локальная (демо-режим). */
 export interface AdminSession {
@@ -9,7 +9,7 @@ export interface AdminSession {
 const DEMO_KEY = "av_admin_session";
 export const DEMO_ADMIN_EMAIL = "admin@volkov.photo";
 
-export { isSupabaseConfigured };
+export { isSupabaseConfigured } from "./browser";
 
 function readDemoSession(): AdminSession | null {
   try {
@@ -22,17 +22,12 @@ function readDemoSession(): AdminSession | null {
 
 /** Текущая сессия (асинхронно: сначала Supabase, затем демо-хранилище). */
 export async function getSession(): Promise<AdminSession | null> {
-  const supabase = getSupabaseBrowser();
+  const supabase = await loadSupabase();
   if (supabase) {
     const { data } = await supabase.auth.getSession();
     const email = data.session?.user?.email;
     if (email) return { email, mode: "supabase" };
   }
-  return readDemoSession();
-}
-
-/** Синхронная проверка демо-сессии (для мгновенных решений в UI). */
-export function getSessionSync(): AdminSession | null {
   return readDemoSession();
 }
 
@@ -43,18 +38,19 @@ export type SignInResult = { ok: true; session: AdminSession } | { ok: false; er
  * admin@volkov.photo + любой пароль от 6 символов.
  */
 export async function signIn(email: string, password: string): Promise<SignInResult> {
-  const supabase = getSupabaseBrowser();
+  const supabase = await loadSupabase();
 
   if (supabase) {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
+      /* Общее сообщение: не раскрываем, существует ли аккаунт */
       const msg = /invalid login credentials/i.test(error.message)
         ? "Неверный email или пароль"
         : error.message;
       return { ok: false, error: msg };
     }
     const userEmail = data.user?.email ?? email;
-    /* Доп. проверка: email должен быть в таблице admins (RLS разрешит чтение только админам) */
+    /* Доп. проверка: email должен быть в таблице admins */
     const allowed = await isAllowedAdmin(userEmail);
     if (!allowed) {
       await supabase.auth.signOut();
@@ -78,14 +74,14 @@ export async function signIn(email: string, password: string): Promise<SignInRes
 
 /** Выход: гасим сессию Supabase и демо-хранилище. */
 export async function signOut(): Promise<void> {
-  const supabase = getSupabaseBrowser();
+  const supabase = await loadSupabase();
   if (supabase) await supabase.auth.signOut();
   localStorage.removeItem(DEMO_KEY);
 }
 
 /** Принадлежность к таблице admins (в демо — по известному email). */
 export async function isAllowedAdmin(email: string): Promise<boolean> {
-  const supabase = getSupabaseBrowser();
+  const supabase = await loadSupabase();
   if (!supabase) return email.trim().toLowerCase() === DEMO_ADMIN_EMAIL;
   const { data, error } = await supabase.from("admins").select("id").eq("email", email).limit(1);
   return !error && (data?.length ?? 0) > 0;
@@ -93,19 +89,24 @@ export async function isAllowedAdmin(email: string): Promise<boolean> {
 
 /** Подписка на смену аутентификации (Supabase + storage-события демо). */
 export function onAuthChange(cb: (session: AdminSession | null) => void): () => void {
-  const supabase = getSupabaseBrowser();
   const subs: Array<() => void> = [];
-  if (supabase) {
+  let active = true;
+  /* SDK может ещё грузиться — подписываемся, когда клиент готов */
+  loadSupabase().then((supabase) => {
+    if (!supabase || !active) return;
     const { data } = supabase.auth.onAuthStateChange((_event, s) => {
       const email = s?.user?.email;
       cb(email ? { email, mode: "supabase" } : readDemoSession());
     });
     subs.push(() => data.subscription.unsubscribe());
-  }
+  });
   const onStorage = (e: StorageEvent) => {
     if (e.key === DEMO_KEY) cb(readDemoSession());
   };
   window.addEventListener("storage", onStorage);
   subs.push(() => window.removeEventListener("storage", onStorage));
-  return () => subs.forEach((u) => u());
+  return () => {
+    active = false;
+    subs.forEach((u) => u());
+  };
 }
