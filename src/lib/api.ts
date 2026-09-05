@@ -25,11 +25,35 @@ export interface DbCategory {
 export interface DbProject {
   id: string;
   title: string;
+  slug?: string | null; // человекочитаемый адрес /portfolio/[slug]
   description: string | null;
   location: string | null;
   date: string | null; // DATE → ISO-строка
   category_id: string;
   cover_image_url: string | null;
+}
+
+/* Транслитерация кириллицы для клиентской генерации slug'ов. */
+const RU_LAT: Record<string, string> = {
+  а: "a", б: "b", в: "v", г: "g", д: "d", е: "e", ё: "yo", ж: "zh", з: "z",
+  и: "i", й: "y", к: "k", л: "l", м: "m", н: "n", о: "o", п: "p", р: "r",
+  с: "s", т: "t", у: "u", ф: "f", х: "h", ц: "ts", ч: "ch", ш: "sh",
+  щ: "sch", ъ: "", ы: "y", ь: "", э: "e", ю: "yu", я: "ya",
+};
+
+const slugify = (s: string) =>
+  s
+    .toLowerCase()
+    .split("")
+    .map((ch) => (RU_LAT[ch] !== undefined ? RU_LAT[ch] : ch))
+    .join("")
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+/** Адрес проекта: колонка slug из БД либо детерминированная генерация из названия. */
+export function projectSlug(p: DbProject): string {
+  return p.slug?.trim() || slugify(p.title);
 }
 
 export interface DbPhoto {
@@ -95,6 +119,7 @@ const LOCAL_PROJECTS: DbProject[] = [
   {
     id: "prj-silence",
     title: "Silence of the City",
+    slug: "silence-of-the-city",
     description: "Ночные улицы, дождь и неон — город, который говорит шёпотом.",
     location: "Москва",
     date: "2025-01-15",
@@ -104,6 +129,7 @@ const LOCAL_PROJECTS: DbProject[] = [
   {
     id: "prj-faces",
     title: "Faces",
+    slug: "faces",
     description: "Люди при свете окна и при свете лампы. Плёнка, средний формат.",
     location: "Москва · Санкт-Петербург",
     date: "2024-06-01",
@@ -113,6 +139,7 @@ const LOCAL_PROJECTS: DbProject[] = [
   {
     id: "prj-concrete",
     title: "Concrete & Light",
+    slug: "concrete-and-light",
     description: "Брутализм, ритм окон и одна тень на весь фасад.",
     location: "Берлин",
     date: "2023-09-10",
@@ -122,6 +149,7 @@ const LOCAL_PROJECTS: DbProject[] = [
   {
     id: "prj-still",
     title: "Still Moments",
+    slug: "still-moments",
     description: "Постановочный свет: от голландского натюрморта до редакционного минимализма.",
     location: "Студия",
     date: "2024-11-20",
@@ -131,6 +159,7 @@ const LOCAL_PROJECTS: DbProject[] = [
   {
     id: "prj-north",
     title: "Northern Thaw",
+    slug: "northern-thaw",
     description: "Хребты в тумане и гребни дюн на границе света и тени.",
     location: "Кавказ · Руб-эль-Хали",
     date: "2023-05-05",

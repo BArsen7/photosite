@@ -34,7 +34,7 @@ export default function FeaturedProjects() {
       <div className="grid gap-x-6 gap-y-16 md:grid-cols-3">
         {FEATURED_PROJECTS.map((p, i) => (
           <Reveal key={p.id} delay={i * 130} className={i === 1 ? "md:translate-y-10" : ""}>
-            <Link to="/portfolio" className="group block" aria-label={`Проект «${p.title}»`}>
+            <Link to={`/portfolio/${p.id}`} className="group block" aria-label={`Проект «${p.title}»`}>
               <div className="relative overflow-hidden">
                 <Photo
                   src={p.cover}
