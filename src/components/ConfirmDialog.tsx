@@ -9,7 +9,7 @@ import { AlertTriangleIcon, CloseIcon } from "./Icons";
  */
 export default function ConfirmDialog({
   open,
-  heading = "Are you sure?",
+  heading = "Вы уверены?",
   message,
   confirmLabel = "Удалить навсегда",
   busyLabel = "Удаляем…",

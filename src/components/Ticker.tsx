@@ -13,9 +13,11 @@ export default function Ticker() {
             {strip.map((g, i) => (
               <span key={`${copy}-${i}`} className="flex items-center gap-10">
                 <span className="font-display text-xl font-bold uppercase tracking-wide md:text-2xl">
-                  {g.en}
+                  {g.ru}
                 </span>
-                <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-mut">{g.ru}</span>
+                <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-mut">
+                  {String(i % GENRES.length + 1).padStart(2, "0")}
+                </span>
                 <DiamondSep className="text-acc" />
               </span>
             ))}

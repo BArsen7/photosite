@@ -171,8 +171,8 @@ export default function AdminProjectsPage() {
   return (
     <div className="px-6 py-10 md:px-10">
       <PageHead
-        kicker="Darkroom · Projects"
-        title="Manage Projects"
+        kicker="Тёмная комната · Проекты"
+        title="Управление проектами"
         sub="Серии публикаций: название, адрес, категория, география и дата."
         action={
           <button

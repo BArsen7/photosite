@@ -153,7 +153,7 @@ export default function ProjectPage() {
           className="group inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.28em] text-acc transition-colors hover:text-ink"
         >
           <ChevronLeft size={16} className="transition-transform duration-300 group-hover:-translate-x-1" />
-          Back to Portfolio
+          Вернуться в портфолио
         </Link>
       </div>
     );
@@ -171,7 +171,7 @@ export default function ProjectPage() {
             className="group inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-mut transition-colors duration-300 hover:text-acc"
           >
             <ChevronLeft size={15} className="transition-transform duration-300 group-hover:-translate-x-1" />
-            Portfolio
+            В портфолио
           </Link>
 
           <div className="mt-8 flex items-center gap-4">
@@ -214,13 +214,13 @@ export default function ProjectPage() {
               <p className="mb-4 font-mono text-[9px] uppercase tracking-[0.3em] text-mut">EXIF</p>
               <div className="flex flex-wrap gap-2">
                 {exif.cameras.map((c) => (
-                  <Badge key={c} label="Cam" value={c} />
+                  <Badge key={c} label="Камера" value={c} />
                 ))}
                 {exif.lenses.map((l) => (
-                  <Badge key={l} label="Lens" value={l} />
+                  <Badge key={l} label="Объектив" value={l} />
                 ))}
                 {exif.settings.map((s) => (
-                  <Badge key={s} label="Set" value={s} />
+                  <Badge key={s} label="Съёмка" value={s} />
                 ))}
               </div>
             </div>
@@ -281,8 +281,8 @@ export default function ProjectPage() {
       {/* ── 4. Навигация между проектами ── */}
       {prev && next && (
         <nav className="mt-20 grid border-t border-line lg:grid-cols-2" aria-label="Навигация по проектам">
-          <ProjectNavLink to={projectSlug(prev)} label="← Previous Project" p={prev} align="left" />
-          <ProjectNavLink to={projectSlug(next)} label="Next Project →" p={next} align="right" />
+          <ProjectNavLink to={projectSlug(prev)} label="← Предыдущий проект" p={prev} align="left" />
+          <ProjectNavLink to={projectSlug(next)} label="Следующий проект →" p={next} align="right" />
         </nav>
       )}
 

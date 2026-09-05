@@ -5,7 +5,7 @@ import { usePageMeta } from "../lib/meta";
 /** /contact — услуги с ценами, затем форма заявки. */
 export default function ContactPage() {
   usePageMeta({
-    title: "Contact",
+    title: "Контакты",
     description:
       "Заказать съёмку у Артёма Волкова: портрет, стрит, архитектура, натюрморт, пейзаж. Ответ в течение 24 часов.",
   });

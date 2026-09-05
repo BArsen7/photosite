@@ -1,5 +1,6 @@
-/** Моковые данные проектов — позже заменяются выборкой из Supabase
- *  (таблицы projects + photos, вьюха photos_public). */
+/** Моковые данные избранных проектов для главной страницы.
+ *  `id` совпадает со slug'ом проекта в БД — ссылка ведёт на /portfolio/[slug].
+ *  Позже заменяются выборкой из Supabase (таблица projects). */
 export interface Project {
   id: string;
   title: string;
@@ -13,8 +14,8 @@ export interface Project {
 export const FEATURED_PROJECTS: Project[] = [
   {
     id: "silence-of-the-city",
-    title: "Silence of the City",
-    category: "Street",
+    title: "Тишина города",
+    category: "Улица",
     year: 2025,
     location: "Москва",
     description:
@@ -24,8 +25,8 @@ export const FEATURED_PROJECTS: Project[] = [
   },
   {
     id: "concrete-and-light",
-    title: "Concrete & Light",
-    category: "Architecture",
+    title: "Бетон и свет",
+    category: "Архитектура",
     year: 2023,
     location: "Берлин",
     description:
@@ -35,8 +36,8 @@ export const FEATURED_PROJECTS: Project[] = [
   },
   {
     id: "northern-thaw",
-    title: "Northern Thaw",
-    category: "Landscape",
+    title: "Север. Оттепель",
+    category: "Пейзаж",
     year: 2023,
     location: "Кавказ",
     description:
