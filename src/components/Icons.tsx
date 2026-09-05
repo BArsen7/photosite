@@ -151,3 +151,43 @@ export function FrameCorners({ className = "" }: { className?: string }) {
     </div>
   );
 }
+
+/* ── Иконки админ-панели ─────────────────────────────────────────────── */
+
+export function GridIcon({ size, className }: IconProps) {
+  return (
+    <svg {...base(size, className)}>
+      <rect x="4" y="4" width="7" height="7" />
+      <rect x="13" y="4" width="7" height="7" />
+      <rect x="4" y="13" width="7" height="7" />
+      <rect x="13" y="13" width="7" height="7" />
+    </svg>
+  );
+}
+
+export function UploadIcon({ size, className }: IconProps) {
+  return (
+    <svg {...base(size, className)}>
+      <path d="M12 15V4M7.5 8.5 12 4l4.5 4.5" />
+      <path d="M4 15v5h16v-5" />
+    </svg>
+  );
+}
+
+export function LayersIcon({ size, className }: IconProps) {
+  return (
+    <svg {...base(size, className)}>
+      <rect x="4" y="4" width="12" height="12" />
+      <path d="M8 8h12v12H8" />
+    </svg>
+  );
+}
+
+export function ExitIcon({ size, className }: IconProps) {
+  return (
+    <svg {...base(size, className)}>
+      <path d="M14 4H5v16h9" />
+      <path d="M10 12h11M17 8l4 4-4 4" />
+    </svg>
+  );
+}

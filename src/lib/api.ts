@@ -1,16 +1,8 @@
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { PHOTOS } from "../data/photos";
+import { getSupabaseBrowser } from "./supabase/browser";
 
-/**
- * Supabase-клиент создаётся только если в .env есть ключи:
- *   VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY
- * Иначе сайт полностью работает на локальных данных (демо-режим).
- */
-const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
-const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
-
-export const supabase: SupabaseClient | null =
-  url && anonKey ? createClient(url, anonKey) : null;
+/** Единый browser-клиент Supabase (см. lib/supabase/browser.ts). */
+export const supabase = getSupabaseBrowser();
 
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -41,7 +33,7 @@ const RU_LAT: Record<string, string> = {
   щ: "sch", ъ: "", ы: "y", ь: "", э: "e", ю: "yu", я: "ya",
 };
 
-const slugify = (s: string) =>
+export const slugify = (s: string) =>
   s
     .toLowerCase()
     .split("")
