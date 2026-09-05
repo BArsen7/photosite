@@ -1,23 +1,30 @@
 import { useCallback, useEffect } from "react";
-import type { Photo } from "../data/photos";
-import { GENRES } from "../data/photos";
 import { ChevronLeft, ChevronRight, CloseIcon } from "./Icons";
 import { useLockBody } from "../lib/motion";
 
-/** Полноэкранный просмотр кадра: клавиатура, зацикленная навигация, EXIF-лента. */
+/** Универсальный элемент лайтбокса (не зависит от источника данных). */
+export interface LightboxItem {
+  id: string;
+  src: string;
+  alt: string;
+  title: string;
+  meta: { label: string; value: string }[];
+}
+
+/** Полноэкранный просмотр кадра: клавиатура, зацикленная навигация, мета-лента. */
 export default function Lightbox({
-  photos,
+  items,
   index,
   onClose,
   onNav,
 }: {
-  photos: Photo[];
+  items: LightboxItem[];
   index: number;
   onClose: () => void;
   onNav: (next: number) => void;
 }) {
-  const photo = photos[index];
-  const n = photos.length;
+  const item = items[index];
+  const n = items.length;
   useLockBody(true);
 
   const prev = useCallback(() => onNav((index - 1 + n) % n), [index, n, onNav]);
@@ -34,22 +41,11 @@ export default function Lightbox({
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose, prev, next]);
 
-  const genre = GENRES.find((g) => g.id === photo.genre);
-
-  const exif: Array<[string, string]> = [
-    ["Камера", photo.camera],
-    ["Объектив", photo.lens],
-    ["Диафрагма", `ƒ/${photo.aperture}`],
-    ["Выдержка", photo.shutter],
-    ["ISO", String(photo.iso)],
-    ["Локация", `${photo.location}, ${photo.year}`],
-  ];
-
   return (
     <div
       role="dialog"
       aria-modal="true"
-      aria-label={`${photo.title} — просмотр`}
+      aria-label={`${item.title} — просмотр`}
       className="lb-in fixed inset-0 z-[70] flex flex-col bg-coal/[0.97]"
       onClick={onClose}
     >
@@ -57,7 +53,7 @@ export default function Lightbox({
       <div className="flex items-center justify-between px-5 py-4 md:px-10" onClick={(e) => e.stopPropagation()}>
         <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-mut">
           <span className="text-acc">{String(index + 1).padStart(2, "0")}</span> / {String(n).padStart(2, "0")}
-          <span className="ml-4 hidden text-ink sm:inline">{photo.title}</span>
+          <span className="ml-4 hidden text-ink sm:inline">{item.title}</span>
         </p>
         <button
           onClick={onClose}
@@ -78,11 +74,11 @@ export default function Lightbox({
           <ChevronLeft size={20} />
         </button>
 
-        {/* key=index перезапускает анимацию при навигации */}
+        {/* key=id перезапускает анимацию при навигации */}
         <img
-          key={photo.id}
-          src={photo.src}
-          alt={photo.alt}
+          key={item.id}
+          src={item.src}
+          alt={item.alt}
           onClick={(e) => e.stopPropagation()}
           className="lb-in max-h-full max-w-full object-contain shadow-[0_30px_80px_rgba(0,0,0,0.6)]"
         />
@@ -96,21 +92,20 @@ export default function Lightbox({
         </button>
       </div>
 
-      {/* EXIF-лента */}
+      {/* Мета-лента (EXIF, локация, жанр) */}
       <div
-        className="grid grid-cols-3 gap-x-6 gap-y-3 border-t border-line px-5 py-4 md:grid-cols-6 md:px-10"
+        className="flex flex-wrap items-start gap-x-10 gap-y-3 border-t border-line px-5 py-4 md:px-10"
         onClick={(e) => e.stopPropagation()}
       >
-        {exif.map(([label, value]) => (
-          <div key={label}>
-            <p className="font-mono text-[9px] uppercase tracking-[0.25em] text-mut">{label}</p>
-            <p className="mt-1 truncate font-mono text-[11px] text-ink" title={value}>{value}</p>
+        {item.meta.map((m) => (
+          <div key={m.label}>
+            <p className="font-mono text-[9px] uppercase tracking-[0.25em] text-mut">{m.label}</p>
+            <p className="mt-1 max-w-56 truncate font-mono text-[11px] text-ink" title={m.value}>
+              {m.value}
+            </p>
           </div>
         ))}
       </div>
-      {genre && (
-        <p className="sr-only">Жанр: {genre.ru}</p>
-      )}
     </div>
   );
 }

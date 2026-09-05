@@ -38,7 +38,7 @@ export default function Navbar() {
             : "border-b border-transparent"
         }`}
       >
-        <div className="flex items-center justify-between px-5 py-4 md:px-10">
+        <div className="flex h-16 items-center justify-between px-5 md:px-10">
           {/* Логотип слева */}
           <Link
             to="/"
