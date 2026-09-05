@@ -200,6 +200,71 @@ function buildLocalPortfolio(): PortfolioData {
   return { categories: LOCAL_CATEGORIES, projects: LOCAL_PROJECTS, photos };
 }
 
+/* ── Управление архивом (админка) ─────────────────────────────────────── */
+
+/** Путь к объекту в бакете `photos` из публичного URL (для удаления из Storage). */
+export function storagePathFromUrl(imageUrl: string): string | null {
+  const marker = "/storage/v1/object/public/photos/";
+  const i = imageUrl.indexOf(marker);
+  return i >= 0 ? decodeURIComponent(imageUrl.slice(i + marker.length)) : null;
+}
+
+/** Удаляет файл из Supabase Storage (если он там лежит). */
+async function removeStoredFile(imageUrl: string | null | undefined): Promise<void> {
+  if (!supabase || !imageUrl) return;
+  const path = storagePathFromUrl(imageUrl);
+  if (!path) return;
+  try {
+    await supabase.storage.from("photos").remove([path]);
+  } catch {
+    /* файл уже удалён или нет прав — не блокируем удаление записи */
+  }
+}
+
+/** Удаление кадра: файл из Storage + строка из `photos`. */
+export async function deletePhotoRecord(photo: {
+  id: string;
+  image_url: string | null;
+}): Promise<void> {
+  if (supabase) {
+    await removeStoredFile(photo.image_url);
+    const { error } = await supabase.from("photos").delete().eq("id", photo.id);
+    if (error) throw new Error(error.message);
+    return;
+  }
+  await delay(500); // демо-режим: имитация запроса
+}
+
+/** Удаление проекта: все файлы кадров из Storage, кадры, затем проект. */
+export async function deleteProjectRecord(
+  project: DbProject,
+  photos: DbPhoto[],
+): Promise<void> {
+  if (supabase) {
+    const owned = photos.filter((p) => p.project_id === project.id);
+    await Promise.all(owned.map((p) => removeStoredFile(p.image_url)));
+    const { error: phErr } = await supabase.from("photos").delete().eq("project_id", project.id);
+    const { error: prErr } = await supabase.from("projects").delete().eq("id", project.id);
+    if (phErr) throw new Error(phErr.message);
+    if (prErr) throw new Error(prErr.message);
+    return;
+  }
+  await delay(500);
+}
+
+/** Обновление кадра (EXIF, проект, порядок). */
+export async function updatePhotoRecord(
+  id: string,
+  patch: Partial<DbPhoto>,
+): Promise<void> {
+  if (supabase) {
+    const { error } = await supabase.from("photos").update(patch).eq("id", id);
+    if (error) throw new Error(error.message);
+    return;
+  }
+  await delay(400);
+}
+
 /* ── Заявки ────────────────────────────────────────────────────────────── */
 
 export interface Inquiry {

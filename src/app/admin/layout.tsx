@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { LogoMark, GridIcon, UploadIcon, LayersIcon, ExitIcon, CloseIcon } from "../../components/Icons";
+import { LogoMark, GridIcon, UploadIcon, LayersIcon, FilmIcon, ExitIcon, CloseIcon } from "../../components/Icons";
 import { signOut } from "../../lib/supabase/auth";
 import { isSupabaseConfigured } from "../../lib/supabase/browser";
 import { useAdminSession } from "../../middleware";
@@ -10,6 +10,7 @@ const NAV = [
   { to: "/admin", label: "Dashboard", Icon: GridIcon, end: true },
   { to: "/admin/upload", label: "Upload Photo", Icon: UploadIcon, end: false },
   { to: "/admin/projects", label: "Manage Projects", Icon: LayersIcon, end: false },
+  { to: "/admin/manage", label: "Manage Archive", Icon: FilmIcon, end: false },
 ];
 
 /**

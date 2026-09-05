@@ -191,3 +191,49 @@ export function ExitIcon({ size, className }: IconProps) {
     </svg>
   );
 }
+
+export function TrashIcon({ size, className }: IconProps) {
+  return (
+    <svg {...base(size, className)}>
+      <path d="M4.5 7h15M9.5 7V4.5h5V7" />
+      <path d="M6.5 7 7.5 20h9L17.5 7M10 10.5v6M14 10.5v6" />
+    </svg>
+  );
+}
+
+export function PencilIcon({ size, className }: IconProps) {
+  return (
+    <svg {...base(size, className)}>
+      <path d="m4 20 .8-3.8L15.6 5.4a1.6 1.6 0 0 1 2.3 0l.7.7a1.6 1.6 0 0 1 0 2.3L7.8 19.2 4 20Z" />
+      <path d="m13.8 7.2 3 3" />
+    </svg>
+  );
+}
+
+export function FilmIcon({ size, className }: IconProps) {
+  return (
+    <svg {...base(size, className)}>
+      <rect x="3.5" y="5" width="17" height="14" />
+      <path d="M7.5 5v14M16.5 5v14" />
+      <path d="M3.5 9h4M3.5 13h4M3.5 17h4M16.5 9h4M16.5 13h4M16.5 17h4" strokeWidth="1.1" />
+    </svg>
+  );
+}
+
+export function SearchIcon({ size, className }: IconProps) {
+  return (
+    <svg {...base(size, className)}>
+      <circle cx="10.5" cy="10.5" r="6" />
+      <path d="m15.2 15.2 5.3 5.3" />
+    </svg>
+  );
+}
+
+export function AlertTriangleIcon({ size, className }: IconProps) {
+  return (
+    <svg {...base(size, className)}>
+      <path d="M12 4 2.8 19.5h18.4L12 4Z" />
+      <path d="M12 10v4M12 16.6v.01" strokeWidth="1.8" />
+    </svg>
+  );
+}

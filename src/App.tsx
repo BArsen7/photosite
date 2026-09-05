@@ -11,6 +11,7 @@ import AdminLoginPage from "./app/admin/login/page";
 import AdminDashboardPage from "./app/admin/dashboard/page";
 import AdminUploadPage from "./app/admin/upload/page";
 import AdminProjectsPage from "./app/admin/projects/page";
+import AdminManagePage from "./app/admin/manage/page";
 import { RequireAuth, isProtectedPath } from "./middleware";
 
 /** Сброс прокрутки при смене маршрута (кроме внутренних переходов админки). */
@@ -61,6 +62,7 @@ export default function App() {
             <Route index element={<AdminDashboardPage />} />
             <Route path="upload" element={<AdminUploadPage />} />
             <Route path="projects" element={<AdminProjectsPage />} />
+            <Route path="manage" element={<AdminManagePage />} />
           </Route>
 
           <Route path="*" element={<HomePage />} />
