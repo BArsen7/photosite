@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState, type DragEvent, type FormEvent } from "react";
 import { PageHead, Banner, FieldLabel, inputCls } from "../ui";
 import { UploadIcon } from "../../../components/Icons";
-import { fetchPortfolio, supabase, type PortfolioData } from "../../../lib/api";
-import { isSupabaseConfigured } from "../../../lib/supabase/browser";
+import { fetchPortfolio, type PortfolioData } from "../../../lib/api";
+import { isSupabaseConfigured, loadSupabase } from "../../../lib/supabase/browser";
 import { readDemoUploads, DEMO_UPLOADS_KEY, type DemoUpload } from "../dashboard/page";
 
 /** /admin/upload — загрузка кадра: файл → превью → EXIF → Supabase (или демо). */
@@ -89,6 +89,7 @@ export default function AdminUploadPage() {
       sort_order: sortOrder,
     };
 
+    const supabase = await loadSupabase();
     if (supabase) {
       /* Боевой режим: файл → Storage, строка → photos */
       const path = `${Date.now()}-${file.name.replace(/\s+/g, "-")}`;
@@ -310,7 +311,7 @@ export default function AdminUploadPage() {
             ) : (
               <>
                 <UploadIcon size={16} />
-                {supabase ? "Загрузить в Supabase" : "Загрузить (демо)"}
+                {isSupabaseConfigured ? "Загрузить в Supabase" : "Загрузить (демо)"}
               </>
             )}
           </button>

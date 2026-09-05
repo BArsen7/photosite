@@ -1,9 +1,10 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { LogoMark, ArrowUpRight, CheckIcon } from "../../../components/Icons";
 import { signIn, DEMO_ADMIN_EMAIL } from "../../../lib/supabase/auth";
 import { isSupabaseConfigured } from "../../../lib/supabase/browser";
 import { useAdminSession } from "../../../middleware";
+import { usePageMeta } from "../../../lib/meta";
 
 /**
  * /admin/login — вход через Supabase Auth (signInWithPassword).
@@ -21,12 +22,33 @@ export default function AdminLoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
+  /* Базовая защита от перебора: 5 неудач → локаут на 30 секунд.
+     (Основная защита — rate-limit самого Supabase Auth + RLS.) */
+  const [attempts, setAttempts] = useState(0);
+  const [lockUntil, setLockUntil] = useState(0);
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    if (lockUntil <= Date.now()) return;
+    const t = window.setInterval(() => setNow(Date.now()), 400);
+    return () => window.clearInterval(t);
+  }, [lockUntil]);
+
+  const lockSecs = Math.max(0, Math.ceil((lockUntil - now) / 1000));
+  const locked = lockSecs > 0;
+
+  usePageMeta({ title: "Admin — вход", noindex: true });
+
   /* Уже залогинен — сразу в кабинет */
   if (state === "ok" && session) return <Navigate to={from} replace />;
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
+    if (locked) {
+      setError(`Слишком много попыток — подождите ${lockSecs} с`);
+      return;
+    }
     if (!/^\S+@\S+\.\S+$/.test(email.trim())) {
       setError("Похоже, в email опечатка");
       return;
@@ -36,12 +58,22 @@ export default function AdminLoginPage() {
       return;
     }
     setBusy(true);
-    const res = await signIn(email.trim(), password);
+    const res = await signIn(email.trim().toLowerCase(), password);
     setBusy(false);
     if (res.ok) {
       navigate(from, { replace: true });
     } else {
-      setError(res.error);
+      /* Не раскрываем, существует ли аккаунт: сообщение всегда общее */
+      const n = attempts + 1;
+      if (n >= 5) {
+        setLockUntil(Date.now() + 30_000);
+        setNow(Date.now());
+        setAttempts(0);
+        setError("Слишком много попыток входа — пауза 30 секунд");
+      } else {
+        setAttempts(n);
+        setError(`${res.error} · попытка ${n} из 5`);
+      }
     }
   };
 
@@ -140,10 +172,15 @@ export default function AdminLoginPage() {
             </div>
             <button
               type="submit"
-              disabled={busy}
+              disabled={busy || locked}
               className="group flex w-full items-center justify-center gap-3 border border-ink/50 py-3.5 font-mono text-[11px] uppercase tracking-[0.3em] text-ink transition-all duration-400 hover:border-acc hover:bg-acc hover:text-coal disabled:cursor-wait disabled:opacity-60"
             >
-              {busy ? (
+              {locked ? (
+                <>
+                  <span className="pulsedot h-1.5 w-1.5 rounded-full bg-err" aria-hidden="true" />
+                  Пауза · {lockSecs} с
+                </>
+              ) : busy ? (
                 <>
                   <span className="pulsedot h-1.5 w-1.5 rounded-full bg-current" aria-hidden="true" />
                   Открываем дверь…

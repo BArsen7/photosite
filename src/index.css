@@ -61,6 +61,11 @@ body {
   100% { transform: scaleY(0); transform-origin: bottom; }
 }
 @keyframes blinkc { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+@keyframes popin {
+  from { opacity: 0; transform: scale(0.94) translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+.pop-in { animation: popin 0.32s cubic-bezier(0.22, 0.61, 0.36, 1) both; }
 @keyframes pulsedot {
   0%, 100% { box-shadow: 0 0 0 0 rgba(208, 160, 76, 0.5); }
   70%      { box-shadow: 0 0 0 7px rgba(208, 160, 76, 0); }
@@ -124,11 +129,11 @@ body {
 /* ── Уважение к prefers-reduced-motion ─────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .anim-kenburns, .anim-marquee, .fadeup, .lb-in,
+  .anim-kenburns, .anim-marquee, .fadeup, .lb-in, .pop-in,
   .cue-line, .blinkc, .pulsedot, .skeleton-pulse {
     animation: none !important;
   }
-  .fadeup, .lb-in { opacity: 1 !important; }
+  .fadeup, .lb-in, .pop-in { opacity: 1 !important; }
   .rv, .rv-line > span {
     opacity: 1 !important;
     transform: none !important;

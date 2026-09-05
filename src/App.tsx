@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { Suspense, lazy, useEffect } from "react";
 import { HashRouter, Route, Routes, useLocation } from "react-router-dom";
 import RootLayout from "./app/layout";
 import HomePage from "./app/page";
@@ -6,14 +6,20 @@ import PortfolioPage from "./pages/PortfolioPage";
 import ProjectPage from "./pages/ProjectPage";
 import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
-import AdminLayout from "./app/admin/layout";
-import AdminLoginPage from "./app/admin/login/page";
-import AdminDashboardPage from "./app/admin/dashboard/page";
-import AdminUploadPage from "./app/admin/upload/page";
-import AdminProjectsPage from "./app/admin/projects/page";
 import { RequireAuth, isProtectedPath } from "./middleware";
 
-/** Сброс прокрутки при смене маршрута (кроме внутренних переходов админки). */
+/**
+ * Админка вынесена в отдельные чанки (code splitting): посетители сайта
+ * не скачивают Supabase SDK и страницы «тёмной комнаты».
+ */
+const AdminLayout = lazy(() => import("./app/admin/layout"));
+const AdminLoginPage = lazy(() => import("./app/admin/login/page"));
+const AdminDashboardPage = lazy(() => import("./app/admin/dashboard/page"));
+const AdminUploadPage = lazy(() => import("./app/admin/upload/page"));
+const AdminProjectsPage = lazy(() => import("./app/admin/projects/page"));
+const AdminManagePage = lazy(() => import("./app/admin/manage/page"));
+
+/** Сброс прокрутки при смене маршрута. */
 function ScrollToTop() {
   const { pathname } = useLocation();
   useEffect(() => {
@@ -28,6 +34,18 @@ function Shell({ children }: { children: React.ReactNode }) {
   return isProtectedPath(pathname) ? <>{children}</> : <RootLayout>{children}</RootLayout>;
 }
 
+/** Индикатор подгрузки ленивых чанков админки. */
+function AdminFallback() {
+  return (
+    <div className="flex min-h-svh flex-col items-center justify-center gap-5 bg-coal">
+      <span className="pulsedot h-2.5 w-2.5 rounded-full bg-acc" aria-hidden="true" />
+      <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-mut">
+        Проявляем тёмную комнату…
+      </p>
+    </div>
+  );
+}
+
 /**
  * Точка входа. HashRouter: приложение раздаётся статически.
  * Админка защищена <RequireAuth> — аналогом Next.js middleware:
@@ -38,33 +56,36 @@ export default function App() {
     <HashRouter>
       <ScrollToTop />
       <Shell>
-        <Routes>
-          {/* Публичная витрина */}
-          <Route path="/" element={<HomePage />} />
-          <Route path="/portfolio" element={<PortfolioPage />} />
-          <Route path="/portfolio/:slug" element={<ProjectPage />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/contact" element={<ContactPage />} />
+        <Suspense fallback={<AdminFallback />}>
+          <Routes>
+            {/* Публичная витрина */}
+            <Route path="/" element={<HomePage />} />
+            <Route path="/portfolio" element={<PortfolioPage />} />
+            <Route path="/portfolio/:slug" element={<ProjectPage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/contact" element={<ContactPage />} />
 
-          {/* Вход — публичный, но вне витринного layout */}
-          <Route path="/admin/login" element={<AdminLoginPage />} />
+            {/* Вход — публичный, но вне витринного layout */}
+            <Route path="/admin/login" element={<AdminLoginPage />} />
 
-          {/* Защищённая админка */}
-          <Route
-            path="/admin"
-            element={
-              <RequireAuth>
-                <AdminLayout />
-              </RequireAuth>
-            }
-          >
-            <Route index element={<AdminDashboardPage />} />
-            <Route path="upload" element={<AdminUploadPage />} />
-            <Route path="projects" element={<AdminProjectsPage />} />
-          </Route>
+            {/* Защищённая админка */}
+            <Route
+              path="/admin"
+              element={
+                <RequireAuth>
+                  <AdminLayout />
+                </RequireAuth>
+              }
+            >
+              <Route index element={<AdminDashboardPage />} />
+              <Route path="upload" element={<AdminUploadPage />} />
+              <Route path="projects" element={<AdminProjectsPage />} />
+              <Route path="manage" element={<AdminManagePage />} />
+            </Route>
 
-          <Route path="*" element={<HomePage />} />
-        </Routes>
+            <Route path="*" element={<HomePage />} />
+          </Routes>
+        </Suspense>
       </Shell>
     </HashRouter>
   );

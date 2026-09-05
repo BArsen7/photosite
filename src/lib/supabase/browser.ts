@@ -1,28 +1,28 @@
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
-/**
- * Browser-клиент Supabase (аналог lib/supabase/client.ts из Next.js).
- * Синглтон: один клиент на всё приложение. Без ключей в окружении
- * возвращает null — приложение переходит в демо-режим.
- *
- *   VITE_SUPABASE_URL=https://xxxx.supabase.co
- *   VITE_SUPABASE_ANON_KEY=eyJ...
- */
 const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
 const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
 
+/** Конфигурация задана в .env — синхронный флаг, не тянет SDK в бандл. */
 export const isSupabaseConfigured = Boolean(url && anonKey);
 
-let client: SupabaseClient | null = null;
+let clientPromise: Promise<SupabaseClient | null> | null = null;
 
-export function getSupabaseBrowser(): SupabaseClient | null {
-  if (!isSupabaseConfigured) return null;
-  if (!client) {
-    client = createClient(url as string, anonKey as string, {
-      auth: { persistSession: true, autoRefreshToken: true },
-    });
+/**
+ * Ленивый browser-клиент Supabase. Динамический import() выносит
+ * @supabase/supabase-js в отдельный чанк: посетители сайта скачивают
+ * SDK только если страница реально обращается к данным.
+ */
+export function loadSupabase(): Promise<SupabaseClient | null> {
+  if (!clientPromise) {
+    clientPromise =
+      url && anonKey
+        ? import("@supabase/supabase-js").then(({ createClient }) =>
+            createClient(url, anonKey, {
+              auth: { persistSession: true, autoRefreshToken: true },
+            }),
+          )
+        : Promise.resolve(null);
   }
-  return client;
+  return clientPromise;
 }
-
-export const supabase = getSupabaseBrowser();
