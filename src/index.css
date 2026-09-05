@@ -11,8 +11,8 @@
   --color-acc: #d0a04c;    /* акцент — янтарь «красной лампы» фотолаборатории */
   --color-err: #d0604a;    /* ошибки форм */
 
-  --font-display: "Syne", ui-sans-serif, sans-serif;
-  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Playfair Display", Georgia, "Times New Roman", serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
 }
 
