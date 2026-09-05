@@ -31,21 +31,21 @@ export default function Hero() {
       <div className="relative z-10 flex flex-col items-center px-6 text-center">
         <p className="fadeup mb-7 flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.38em] text-ink/85">
           <span className="pulsedot h-1.5 w-1.5 rounded-full bg-acc" aria-hidden="true" />
-          Photographer — Moscow
+          Фотограф · Москва
         </p>
 
         <h1
           className="fadeup font-display text-[clamp(3.4rem,10vw,8.5rem)] font-semibold leading-[0.95] tracking-tight"
           style={{ animationDelay: "120ms" }}
         >
-          Artem <span className="italic text-acc">Volkov</span>
+          Артём <span className="italic text-acc">Волков</span>
         </h1>
 
         <p
           className="fadeup mt-6 font-display text-lg italic text-ink/85 md:text-2xl"
           style={{ animationDelay: "240ms" }}
         >
-          Loving light and capturing moments
+          Люблю свет и ловлю моменты
         </p>
 
         <div className="fadeup mt-11" style={{ animationDelay: "360ms" }}>
@@ -53,7 +53,7 @@ export default function Hero() {
             to="/portfolio"
             className="group inline-flex items-center gap-3 border border-ink/50 px-9 py-4 font-mono text-[11px] uppercase tracking-[0.32em] text-ink transition-all duration-500 hover:border-acc hover:bg-acc hover:text-coal"
           >
-            View Portfolio
+            Смотреть работы
             <ArrowUpRight
               size={16}
               className="transition-transform duration-500 group-hover:-translate-y-1 group-hover:translate-x-1"
@@ -64,10 +64,10 @@ export default function Hero() {
 
       {/* Служебные подписи по нижнему краю */}
       <div className="absolute bottom-7 left-6 hidden font-mono text-[10px] uppercase tracking-[0.3em] text-mut md:block">
-        {GENRES.map((g) => g.en).join(" · ")}
+        {GENRES.map((g) => g.ru).join(" · ")}
       </div>
       <div className="absolute bottom-7 right-6 hidden flex-col items-center gap-3 md:flex">
-        <span className="font-mono text-[10px] uppercase tracking-[0.35em] text-mut">Scroll</span>
+        <span className="font-mono text-[10px] uppercase tracking-[0.35em] text-mut">Листайте</span>
         <span className="block h-12 w-px overflow-hidden bg-line">
           <span className="cue-line block h-full w-full bg-acc" />
         </span>

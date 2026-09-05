@@ -7,10 +7,10 @@ import { useAdminSession } from "../../middleware";
 import { useLockBody } from "../../lib/motion";
 
 const NAV = [
-  { to: "/admin", label: "Dashboard", Icon: GridIcon, end: true },
-  { to: "/admin/upload", label: "Upload Photo", Icon: UploadIcon, end: false },
-  { to: "/admin/projects", label: "Manage Projects", Icon: LayersIcon, end: false },
-  { to: "/admin/manage", label: "Manage Archive", Icon: FilmIcon, end: false },
+  { to: "/admin", label: "Сводка", Icon: GridIcon, end: true },
+  { to: "/admin/upload", label: "Загрузка кадра", Icon: UploadIcon, end: false },
+  { to: "/admin/projects", label: "Проекты", Icon: LayersIcon, end: false },
+  { to: "/admin/manage", label: "Архив", Icon: FilmIcon, end: false },
 ];
 
 /**
@@ -35,8 +35,8 @@ export default function AdminLayout() {
       <div className="flex items-center gap-3 border-b border-line px-6 py-6">
         <LogoMark size={26} className="text-acc" />
         <div>
-          <p className="font-display text-lg font-semibold leading-tight">Darkroom</p>
-          <p className="font-mono text-[9px] uppercase tracking-[0.28em] text-mut">Admin panel</p>
+          <p className="font-display text-lg font-semibold leading-tight">Тёмная комната</p>
+          <p className="font-mono text-[9px] uppercase tracking-[0.28em] text-mut">Админ-панель</p>
         </div>
       </div>
 
@@ -79,7 +79,7 @@ export default function AdminLayout() {
             aria-hidden="true"
           />
           <span className={isSupabaseConfigured ? "text-[#6fae7a]" : "text-acc"}>
-            {isSupabaseConfigured ? "Supabase · live" : "Demo mode"}
+            {isSupabaseConfigured ? "Supabase · подключён" : "Демо-режим"}
           </span>
         </p>
         <p className="mt-3 truncate font-mono text-[10px] tracking-[0.08em] text-mut" title={session?.email}>
@@ -90,7 +90,7 @@ export default function AdminLayout() {
           className="group mt-4 flex w-full items-center justify-center gap-2.5 border border-line py-2.5 font-mono text-[10px] uppercase tracking-[0.25em] text-mut transition-all duration-300 hover:border-err hover:text-err"
         >
           <ExitIcon size={15} className="transition-transform duration-300 group-hover:translate-x-0.5" />
-          Logout
+          Выйти
         </button>
       </div>
     </div>
@@ -107,7 +107,7 @@ export default function AdminLayout() {
       <div className="sticky top-0 z-30 flex items-center justify-between border-b border-line bg-coal/95 px-5 py-3.5 backdrop-blur-md lg:hidden">
         <span className="flex items-center gap-2.5">
           <LogoMark size={20} className="text-acc" />
-          <span className="font-display text-base font-semibold">Darkroom</span>
+          <span className="font-display text-base font-semibold">Тёмная комната</span>
         </span>
         <button
           onClick={() => setMobileOpen(true)}

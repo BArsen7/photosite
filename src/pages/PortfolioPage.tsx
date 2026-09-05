@@ -10,6 +10,7 @@ import { FrameCorners } from "../components/Icons";
 import { LineReveal, Reveal } from "../lib/motion";
 import { fetchPortfolio, type DbProject, type PortfolioData } from "../lib/api";
 import { usePageMeta } from "../lib/meta";
+import { plural } from "../lib/format";
 
 const FILTER_ALL = "all";
 const SKELETON_RATIOS = ["3/4", "1/1", "4/5", "16/10", "3/4", "4/5"];
@@ -101,13 +102,13 @@ export default function PortfolioPage() {
 
   const activeLabel =
     active === FILTER_ALL
-      ? "All"
-      : (data?.categories.find((c) => c.slug === active)?.name ?? "All");
+      ? "Все"
+      : (data?.categories.find((c) => c.slug === active)?.name ?? "Все");
   const pct = sortedPhotos.length ? Math.round((visible.length / sortedPhotos.length) * 100) : 0;
 
   /* Аналог generateMetadata: метаданные страницы портфолио */
   usePageMeta({
-    title: "Portfolio",
+    title: "Портфолио",
     description:
       "Все работы Артёма Волкова: стрит, портреты, архитектура, натюрморт и пейзаж. Фильтры по жанрам, EXIF каждого кадра.",
     image: sortedPhotos[0]?.image_url,
@@ -118,10 +119,10 @@ export default function PortfolioPage() {
       {/* Шапка страницы */}
       <section className="px-5 md:px-10">
         <p className="mb-4 font-mono text-[11px] uppercase tracking-[0.35em] text-acc">
-          Artem Volkov · Selected frames 2021—2025
+          Артём Волков · избранные кадры · 2021—2025
         </p>
         <h1 className="font-display text-[clamp(2.8rem,8vw,6rem)] font-semibold leading-none tracking-tight">
-          <LineReveal>Portfolio</LineReveal>
+          <LineReveal>Портфолио</LineReveal>
         </h1>
         <p className="mt-5 max-w-xl text-sm leading-relaxed text-mut md:text-base">
           Пять жанров, два формата — плёнка и цифровой средний формат. Каждый кадр
@@ -142,7 +143,7 @@ export default function PortfolioPage() {
                 : "border-line text-mut hover:border-acc/60 hover:text-ink"
             }`}
           >
-            All <sup className="ml-1">{sortedPhotos.length || ""}</sup>
+            Все <sup className="ml-1">{sortedPhotos.length || ""}</sup>
           </button>
           {/* Категории из данных */}
           {(data?.categories ?? []).map((c) => {
@@ -168,7 +169,8 @@ export default function PortfolioPage() {
       {/* Счётчик выборки + живой индикатор доли */}
       <div className="flex items-center gap-5 px-5 pt-6 md:px-10">
         <p className="whitespace-nowrap font-mono text-[10px] uppercase tracking-[0.25em] text-mut">
-          <span className="text-acc">{visible.length}</span> frames · {activeLabel}
+          <span className="text-acc">{visible.length}</span>{" "}
+          {plural(visible.length, "кадр", "кадра", "кадров")} · {activeLabel}
         </p>
         <div className="h-px flex-1 overflow-hidden bg-line">
           <div

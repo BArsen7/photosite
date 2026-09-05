@@ -2,10 +2,10 @@ import { Link } from "react-router-dom";
 import { LogoMark, TgIcon, IgIcon, MailIcon } from "./Icons";
 
 const NAV = [
-  { to: "/portfolio", label: "Portfolio" },
-  { to: "/about", label: "About" },
-  { to: "/contact", label: "Contact" },
-  { to: "/admin", label: "Admin" },
+  { to: "/portfolio", label: "Портфолио" },
+  { to: "/about", label: "Обо мне" },
+  { to: "/contact", label: "Контакты" },
+  { to: "/admin", label: "Админка" },
 ];
 
 const SOCIALS = [
@@ -22,7 +22,7 @@ export default function Footer() {
         <div className="flex items-center gap-3">
           <LogoMark size={20} className="text-acc" />
           <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-mut">
-            © 2026 Artem Volkov · All frames reserved
+            © 2026 Артём Волков · Все права защищены
           </p>
         </div>
 
@@ -55,7 +55,7 @@ export default function Footer() {
       </div>
 
       <p className="border-t border-line/60 py-4 text-center font-display text-xs italic text-mut/80">
-        Loving light and capturing moments
+        Люблю свет и ловлю моменты
       </p>
     </footer>
   );

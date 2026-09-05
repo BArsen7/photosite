@@ -84,8 +84,8 @@ export default function AdminLoginPage() {
         <div className="flex items-center gap-3">
           <LogoMark size={28} className="text-acc" />
           <div>
-            <p className="font-display text-xl font-semibold leading-tight">Artem Volkov</p>
-            <p className="font-mono text-[9px] uppercase tracking-[0.3em] text-mut">Photographer</p>
+            <p className="font-display text-xl font-semibold leading-tight">Артём Волков</p>
+            <p className="font-mono text-[9px] uppercase tracking-[0.3em] text-mut">Фотограф</p>
           </div>
         </div>
 
@@ -121,7 +121,7 @@ export default function AdminLoginPage() {
             <LogoMark size={26} className="text-acc" />
           </div>
 
-          <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-acc">Admin access</p>
+          <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-acc">Служебный доступ</p>
           <h2 className="mt-3 font-display text-4xl font-semibold tracking-tight">Вход</h2>
           <p className="mt-3 text-sm text-mut">Email и пароль из Supabase Auth.</p>
 

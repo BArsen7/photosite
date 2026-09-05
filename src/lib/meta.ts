@@ -7,13 +7,13 @@ import { useEffect } from "react";
  * данные для тега берутся те же.
  */
 export const SITE = {
-  name: "Artem Volkov — Photographer",
+  name: "Артём Волков — фотограф",
   url: "https://volkov.photo",
   /** Дефолтная OG-обложка (первый уличный кадр, 16:9) */
   image:
     "https://image.qwenlm.ai/generated-images/63cfecc5-6791-4b6d-9663-2a53c23d3f09/_result.png",
   defaultDescription:
-    "Street, portrait, architecture, still life and landscape photography. Плёнка и цифровой средний формат. Москва — весь мир.",
+    "Стрит, портрет, архитектура, натюрморт и пейзаж. Плёнка и цифровой средний формат. Москва — весь мир.",
 };
 
 function upsertMeta(attr: "name" | "property", key: string, content: string) {

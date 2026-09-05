@@ -11,7 +11,7 @@ export default function HomePage() {
   usePageMeta({
     title: null,
     description:
-      "Artem Volkov — фотограф. Street, портрет, архитектура, натюрморт и пейзаж. Плёнка и средний формат, Москва и не только.",
+      "Артём Волков — фотограф. Стрит, портрет, архитектура, натюрморт и пейзаж. Плёнка и средний формат, Москва и не только.",
     image: SITE.image,
   });
 
@@ -24,16 +24,16 @@ export default function HomePage() {
       <Reveal>
         <section className="border-t border-line px-5 py-20 text-center md:py-28">
           <p className="mb-4 font-mono text-[11px] uppercase tracking-[0.35em] text-acc">
-            Have an idea?
+            Есть идея?
           </p>
           <h2 className="mx-auto max-w-3xl font-display text-3xl font-semibold tracking-tight md:text-5xl">
-            Let's make something <span className="italic text-acc">quiet</span> and lasting.
+            Давайте сделаем что-то <span className="italic text-acc">тихое</span> и вечное.
           </h2>
           <Link
             to="/contact"
             className="group mt-9 inline-flex items-center gap-3 border border-ink/50 px-9 py-4 font-mono text-[11px] uppercase tracking-[0.32em] text-ink transition-all duration-500 hover:border-acc hover:bg-acc hover:text-coal"
           >
-            Get in touch
+            Написать мне
             <ArrowUpRight
               size={16}
               className="transition-transform duration-500 group-hover:-translate-y-1 group-hover:translate-x-1"

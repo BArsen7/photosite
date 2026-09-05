@@ -65,7 +65,7 @@ export default function AdminDashboardPage() {
   return (
     <div className="px-6 py-10 md:px-10">
       <PageHead
-        kicker="Darkroom · Dashboard"
+        kicker="Тёмная комната · Сводка"
         title="Сводка архива"
         sub="Живые цифры по проектам и кадрам. Данные — из Supabase или демо-набора."
       />
@@ -125,7 +125,7 @@ export default function AdminDashboardPage() {
             <div className="flex-1 border border-line bg-panel/50 p-6">
               <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-mut">Режим данных</p>
               <p className={`mt-2 font-display text-2xl font-semibold ${isSupabaseConfigured ? "text-[#8fc79a]" : "text-acc"}`}>
-                {isSupabaseConfigured ? "Supabase live" : "Demo dataset"}
+                {isSupabaseConfigured ? "Supabase · подключён" : "Демо-данные"}
               </p>
             </div>
           </div>
@@ -155,7 +155,7 @@ export default function AdminDashboardPage() {
                 </div>
               )}
               <span className="absolute left-1.5 top-1.5 bg-coal/80 px-1.5 py-0.5 font-mono text-[8px] uppercase tracking-[0.15em] text-acc">
-                new
+                новое
               </span>
             </div>
           ))}
@@ -180,7 +180,7 @@ export default function AdminDashboardPage() {
           <span className="flex items-center gap-4">
             <UploadIcon size={20} className="text-acc" />
             <span>
-              <span className="block font-display text-lg font-semibold">Upload Photo</span>
+              <span className="block font-display text-lg font-semibold">Загрузка кадра</span>
               <span className="font-mono text-[9px] uppercase tracking-[0.22em] text-mut">Новый кадр в архив</span>
             </span>
           </span>
@@ -193,7 +193,7 @@ export default function AdminDashboardPage() {
           <span className="flex items-center gap-4">
             <LayersIcon size={20} className="text-acc" />
             <span>
-              <span className="block font-display text-lg font-semibold">Manage Projects</span>
+              <span className="block font-display text-lg font-semibold">Управление проектами</span>
               <span className="font-mono text-[9px] uppercase tracking-[0.22em] text-mut">Серии, категории, даты</span>
             </span>
           </span>

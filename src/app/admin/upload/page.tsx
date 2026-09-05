@@ -150,8 +150,8 @@ export default function AdminUploadPage() {
   return (
     <div className="px-6 py-10 md:px-10">
       <PageHead
-        kicker="Darkroom · Upload"
-        title="Upload Photo"
+        kicker="Тёмная комната · Загрузка"
+        title="Загрузка кадра"
         sub="Кадр привязывается к проекту; EXIF попадёт в бейджи на странице серии."
       />
 

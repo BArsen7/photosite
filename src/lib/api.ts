@@ -101,17 +101,17 @@ export async function fetchPortfolio(): Promise<PortfolioData> {
 /* ── Локальный датасет (демо-режим) ────────────────────────────────────── */
 
 const LOCAL_CATEGORIES: DbCategory[] = [
-  { id: "cat-street", name: "Street", slug: "street" },
-  { id: "cat-portraits", name: "Portraits", slug: "portraits" },
-  { id: "cat-architecture", name: "Architecture", slug: "architecture" },
-  { id: "cat-still-life", name: "Still Life", slug: "still-life" },
-  { id: "cat-landscapes", name: "Landscapes", slug: "landscapes" },
+  { id: "cat-street", name: "Улица", slug: "street" },
+  { id: "cat-portraits", name: "Портрет", slug: "portraits" },
+  { id: "cat-architecture", name: "Архитектура", slug: "architecture" },
+  { id: "cat-still-life", name: "Натюрморт", slug: "still-life" },
+  { id: "cat-landscapes", name: "Пейзаж", slug: "landscapes" },
 ];
 
 const LOCAL_PROJECTS: DbProject[] = [
   {
     id: "prj-silence",
-    title: "Silence of the City",
+    title: "Тишина города",
     slug: "silence-of-the-city",
     description: "Ночные улицы, дождь и неон — город, который говорит шёпотом.",
     location: "Москва",
@@ -121,7 +121,7 @@ const LOCAL_PROJECTS: DbProject[] = [
   },
   {
     id: "prj-faces",
-    title: "Faces",
+    title: "Лица",
     slug: "faces",
     description: "Люди при свете окна и при свете лампы. Плёнка, средний формат.",
     location: "Москва · Санкт-Петербург",
@@ -131,7 +131,7 @@ const LOCAL_PROJECTS: DbProject[] = [
   },
   {
     id: "prj-concrete",
-    title: "Concrete & Light",
+    title: "Бетон и свет",
     slug: "concrete-and-light",
     description: "Брутализм, ритм окон и одна тень на весь фасад.",
     location: "Берлин",
@@ -141,7 +141,7 @@ const LOCAL_PROJECTS: DbProject[] = [
   },
   {
     id: "prj-still",
-    title: "Still Moments",
+    title: "Тихие вещи",
     slug: "still-moments",
     description: "Постановочный свет: от голландского натюрморта до редакционного минимализма.",
     location: "Студия",
@@ -151,7 +151,7 @@ const LOCAL_PROJECTS: DbProject[] = [
   },
   {
     id: "prj-north",
-    title: "Northern Thaw",
+    title: "Север. Оттепель",
     slug: "northern-thaw",
     description: "Хребты в тумане и гребни дюн на границе света и тени.",
     location: "Кавказ · Руб-эль-Хали",

@@ -12,17 +12,17 @@ export default function FeaturedProjects() {
       <Reveal className="mb-14 flex flex-wrap items-end justify-between gap-6">
         <div>
           <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.35em] text-acc">
-            Selected works
+            Избранные работы
           </p>
           <h2 className="font-display text-4xl font-semibold tracking-tight md:text-6xl">
-            Featured <span className="italic text-acc">Projects</span>
+            Избранные <span className="italic text-acc">проекты</span>
           </h2>
         </div>
         <Link
           to="/portfolio"
           className="group flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.25em] text-mut transition-colors duration-300 hover:text-acc"
         >
-          View all
+          Все работы
           <ArrowUpRight
             size={16}
             className="transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1"
@@ -56,7 +56,7 @@ export default function FeaturedProjects() {
                   aria-hidden="true"
                 />
                 <span className="absolute bottom-4 right-4 z-10 flex translate-y-2 items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-acc opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100">
-                  View project <ArrowUpRight size={14} />
+                  Открыть проект <ArrowUpRight size={14} />
                 </span>
               </div>
 

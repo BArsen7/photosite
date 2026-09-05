@@ -21,6 +21,7 @@ import {
   type PortfolioData,
 } from "../../../lib/api";
 import { useLockBody } from "../../../lib/motion";
+import { plural } from "../../../lib/format";
 
 const PAGE_SIZE = 12;
 
@@ -165,7 +166,7 @@ export default function AdminManagePage() {
   return (
     <div className="px-6 py-10 md:px-10">
       <PageHead
-        kicker="Darkroom · Manage"
+        kicker="Тёмная комната · Архив"
         title="Архив"
         sub="Все кадры и проекты в одном месте. Удаление затрагивает базу данных и файлы в Storage."
         action={
@@ -264,13 +265,13 @@ export default function AdminManagePage() {
                         onClick={() => setEditingPhoto(ph)}
                         className="flex flex-1 items-center justify-center gap-2 py-2.5 font-mono text-[9px] uppercase tracking-[0.2em] text-mut transition-colors hover:bg-raise hover:text-acc"
                       >
-                        <PencilIcon size={13} /> Edit
+                        <PencilIcon size={13} /> Изменить
                       </button>
                       <button
                         onClick={() => setPendingPhoto(ph)}
                         className="flex flex-1 items-center justify-center gap-2 border-l border-line py-2.5 font-mono text-[9px] uppercase tracking-[0.2em] text-mut transition-colors hover:bg-err/[0.1] hover:text-err"
                       >
-                        <TrashIcon size={13} /> Delete
+                        <TrashIcon size={13} /> Удалить
                       </button>
                     </div>
                   </div>
@@ -313,7 +314,7 @@ export default function AdminManagePage() {
                       </div>
                     )}
                     <span className="absolute right-2.5 top-2.5 bg-coal/80 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.2em] text-acc">
-                      {framesIn.get(p.id) ?? 0} кадров
+                      {framesIn.get(p.id) ?? 0} {plural(framesIn.get(p.id) ?? 0, "кадр", "кадра", "кадров")}
                     </span>
                   </div>
                   <div className="p-4">
@@ -327,13 +328,13 @@ export default function AdminManagePage() {
                         to="/admin/projects"
                         className="flex flex-1 items-center justify-center gap-2 py-2.5 font-mono text-[9px] uppercase tracking-[0.2em] text-mut transition-colors hover:bg-raise hover:text-acc"
                       >
-                        <PencilIcon size={13} /> Edit
+                        <PencilIcon size={13} /> Изменить
                       </Link>
                       <button
                         onClick={() => setPendingProject(p)}
                         className="flex flex-1 items-center justify-center gap-2 border-l border-line py-2.5 font-mono text-[9px] uppercase tracking-[0.2em] text-mut transition-colors hover:bg-err/[0.1] hover:text-err"
                       >
-                        <TrashIcon size={13} /> Delete
+                        <TrashIcon size={13} /> Удалить
                       </button>
                     </div>
                   </div>

@@ -6,7 +6,7 @@ import { usePageMeta } from "../lib/meta";
 /** /about — манифест, биография со статистикой, выставки и пресса. */
 export default function AboutPage() {
   usePageMeta({
-    title: "About",
+    title: "Обо мне",
     description:
       "Артём Волков — фотограф из Москвы. Подход, техника, статистика, выставки и публикации с 2021 года.",
   });

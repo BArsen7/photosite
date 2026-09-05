@@ -4,9 +4,9 @@ import { LogoMark, TgIcon, IgIcon, MailIcon } from "./Icons";
 import { useLockBody } from "../lib/motion";
 
 const LINKS = [
-  { to: "/portfolio", label: "Portfolio" },
-  { to: "/about", label: "About" },
-  { to: "/contact", label: "Contact" },
+  { to: "/portfolio", label: "Портфолио" },
+  { to: "/about", label: "Обо мне" },
+  { to: "/contact", label: "Контакты" },
 ];
 
 const SOCIALS = [
@@ -43,12 +43,12 @@ export default function Navbar() {
           <Link
             to="/"
             className="group flex items-center gap-3"
-            aria-label="Artem Volkov — home"
+            aria-label="Артём Волков — на главную"
             onClick={() => setOpen(false)}
           >
             <LogoMark size={26} className="text-acc transition-transform duration-500 group-hover:rotate-90" />
             <span className="font-display text-lg font-semibold tracking-wide">
-              Artem Volkov
+              Артём Волков
             </span>
           </Link>
 
@@ -137,7 +137,7 @@ export default function Navbar() {
             </a>
           ))}
           <span className="ml-2 font-mono text-[10px] uppercase tracking-[0.25em] text-mut">
-            Moscow · 2026
+            Москва · 2026
           </span>
         </div>
       </div>
