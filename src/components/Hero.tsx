@@ -1,66 +1,69 @@
-import Photo from "./Photo";
-import { PHOTOS } from "../data/photos";
-import { useScramble } from "../lib/motion";
-import { FrameCorners } from "./Icons";
+import { Link } from "react-router-dom";
+import { GENRES } from "../data/photos";
+import { ArrowUpRight, FrameCorners } from "./Icons";
 
-/** Открытие — полный кадр с EXIF-паспортом снимка, как на контактном листе. */
+/** Обложка главной: полноэкранный кадр, затемнение, имя по центру. */
+const HERO_IMAGE =
+  "https://image.qwenlm.ai/generated-images/63cfecc5-6791-4b6d-9663-2a53c23d3f09/_result.png";
+
 export default function Hero() {
-  const hero = PHOTOS[0];
-  const line1 = useScramble("Артём", 350);
-  const line2 = useScramble("Волков", 750);
-
   return (
-    <section id="top" className="relative h-svh min-h-[620px] overflow-hidden">
-      {/* Фоновый кадр с медленным «дыханием» Ken Burns */}
-      <div className="absolute inset-0">
-        <Photo
-          src={hero.src}
-          alt={hero.alt}
-          ratio="16/9"
-          priority
-          className="absolute inset-0"
-          imgClassName="anim-kenburns"
-        />
-      </div>
+    <section className="relative flex h-svh min-h-[620px] items-center justify-center overflow-hidden">
+      {/* Фоновое изображение с медленным «дыханием» Ken Burns */}
+      <img
+        src={HERO_IMAGE}
+        alt="Ночная улица в дождь, фигура с прозрачным зонтом"
+        className="anim-kenburns absolute inset-0 h-full w-full object-cover"
+      />
 
-      {/* Затемнение к краям — типографика остаётся читаемой */}
-      <div className="absolute inset-0 bg-gradient-to-t from-coal via-coal/25 to-coal/60" aria-hidden="true" />
-      <div className="absolute inset-0 bg-gradient-to-r from-coal/70 via-transparent to-transparent" aria-hidden="true" />
+      {/* Затемнение: равномерное + градиент к краям для читабельности текста */}
+      <div className="absolute inset-0 bg-coal/55" aria-hidden="true" />
+      <div className="absolute inset-0 bg-gradient-to-t from-coal via-transparent to-coal/70" aria-hidden="true" />
 
       <FrameCorners className="inset-4 md:inset-6" />
 
-      {/* Паспорт кадра справа сверху */}
-      <div className="absolute right-8 top-24 hidden text-right font-mono text-[10px] uppercase leading-relaxed tracking-[0.22em] text-ink/80 md:block">
-        <p className="text-acc">FR-01 · Неглинная, дождь</p>
-        <p>{hero.camera} · {hero.lens}</p>
-        <p>ƒ/{hero.aperture} · {hero.shutter} · ISO {hero.iso}</p>
-        <p className="text-mut">Kodak Tri-X 400 @ 1600</p>
-      </div>
-
-      {/* Вертикальная подпись на срезе кадра */}
-      <p
-        className="absolute right-8 top-1/2 hidden -translate-y-1/2 font-mono text-[10px] uppercase tracking-[0.5em] text-mut md:block"
-        style={{ writingMode: "vertical-rl" }}
-      >
-        Москва — Тбилиси — Берлин
-      </p>
-
-      {/* Имя — scramble-decode в две строки, прижато к левому нижнему углу */}
-      <div className="absolute bottom-0 left-0 w-full px-5 pb-8 md:px-10 md:pb-12">
-        <p className="mb-4 flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.35em] text-ink/85">
-          Фотограф · улицы / люди / свет
-          <span className="blinkc inline-block h-3.5 w-2 bg-acc" aria-hidden="true" />
+      {/* Центральная композиция */}
+      <div className="relative z-10 flex flex-col items-center px-6 text-center">
+        <p className="fadeup mb-7 flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.38em] text-ink/85">
+          <span className="pulsedot h-1.5 w-1.5 rounded-full bg-acc" aria-hidden="true" />
+          Photographer — Moscow
         </p>
-        <h1 className="font-display font-extrabold uppercase leading-[0.88] tracking-tight">
-          <span className="block text-[clamp(3.2rem,11vw,9rem)]">{line1}</span>
-          <span className="outline-text block text-[clamp(3.2rem,11vw,9rem)]">{line2}</span>
+
+        <h1
+          className="fadeup font-display text-[clamp(3.4rem,10vw,8.5rem)] font-semibold leading-[0.95] tracking-tight"
+          style={{ animationDelay: "120ms" }}
+        >
+          Artem <span className="italic text-acc">Volkov</span>
         </h1>
+
+        <p
+          className="fadeup mt-6 font-display text-lg italic text-ink/85 md:text-2xl"
+          style={{ animationDelay: "240ms" }}
+        >
+          Loving light and capturing moments
+        </p>
+
+        <div className="fadeup mt-11" style={{ animationDelay: "360ms" }}>
+          <Link
+            to="/portfolio"
+            className="group inline-flex items-center gap-3 border border-ink/50 px-9 py-4 font-mono text-[11px] uppercase tracking-[0.32em] text-ink transition-all duration-500 hover:border-acc hover:bg-acc hover:text-coal"
+          >
+            View Portfolio
+            <ArrowUpRight
+              size={16}
+              className="transition-transform duration-500 group-hover:-translate-y-1 group-hover:translate-x-1"
+            />
+          </Link>
+        </div>
       </div>
 
-      {/*Scroll cue */}
-      <div className="absolute bottom-8 right-8 hidden flex-col items-center gap-3 md:flex">
+      {/* Служебные подписи по нижнему краю */}
+      <div className="absolute bottom-7 left-6 hidden font-mono text-[10px] uppercase tracking-[0.3em] text-mut md:block">
+        {GENRES.map((g) => g.en).join(" · ")}
+      </div>
+      <div className="absolute bottom-7 right-6 hidden flex-col items-center gap-3 md:flex">
         <span className="font-mono text-[10px] uppercase tracking-[0.35em] text-mut">Scroll</span>
-        <span className="block h-14 w-px overflow-hidden bg-line">
+        <span className="block h-12 w-px overflow-hidden bg-line">
           <span className="cue-line block h-full w-full bg-acc" />
         </span>
       </div>

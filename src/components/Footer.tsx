@@ -1,5 +1,11 @@
-import { LogoMark, ArrowUp, TgIcon, IgIcon, MailIcon } from "./Icons";
-import { Reveal, usePrefersReducedMotion } from "../lib/motion";
+import { Link } from "react-router-dom";
+import { LogoMark, TgIcon, IgIcon, MailIcon } from "./Icons";
+
+const NAV = [
+  { to: "/portfolio", label: "Portfolio" },
+  { to: "/about", label: "About" },
+  { to: "/contact", label: "Contact" },
+];
 
 const SOCIALS = [
   { label: "Telegram", href: "https://t.me/volkov_foto", Icon: TgIcon },
@@ -7,44 +13,31 @@ const SOCIALS = [
   { label: "Email", href: "mailto:hello@volkov.photo", Icon: MailIcon },
 ];
 
+/** Подвал: копирайт слева, навигация по центру, соцсети справа. */
 export default function Footer() {
-  const reduced = usePrefersReducedMotion();
-  const toTop = () => window.scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" });
-
   return (
-    <footer className="overflow-hidden border-t border-line">
-      {/* Гигантский контурный wordmark */}
-      <Reveal>
-        <p
-          className="outline-text pointer-events-none select-none whitespace-nowrap text-center font-display text-[19vw] font-extrabold uppercase leading-[0.82] tracking-tight"
-          aria-hidden="true"
-        >
-          Волков
-        </p>
-      </Reveal>
-
-      <div className="flex flex-col gap-10 px-5 pb-10 pt-6 md:flex-row md:items-end md:justify-between md:px-10">
+    <footer className="border-t border-line">
+      <div className="flex flex-col items-center gap-6 px-5 py-9 md:flex-row md:justify-between md:px-10">
         <div className="flex items-center gap-3">
-          <LogoMark size={22} className="text-acc" />
-          <div className="font-mono text-[10px] uppercase leading-relaxed tracking-[0.22em] text-mut">
-            <p>© 2026 Артём Волков</p>
-            <p>Сделано в тёмной комнате · без шаблонов</p>
-          </div>
+          <LogoMark size={20} className="text-acc" />
+          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-mut">
+            © 2026 Artem Volkov · All frames reserved
+          </p>
         </div>
 
-        <nav className="flex flex-wrap gap-x-7 gap-y-2" aria-label="Навигация в подвале">
-          {["Работы", "Подход", "Обо мне", "Услуги", "Выставки", "Контакт"].map((label, i) => (
-            <a
-              key={label}
-              href={`#${["works", "approach", "about", "services", "exhibitions", "contact"][i]}`}
-              className="font-mono text-[10px] uppercase tracking-[0.22em] text-mut transition-colors hover:text-acc"
+        <nav className="flex gap-8" aria-label="Навигация в подвале">
+          {NAV.map((l) => (
+            <Link
+              key={l.to}
+              to={l.to}
+              className="font-mono text-[10px] uppercase tracking-[0.22em] text-mut transition-colors duration-300 hover:text-acc"
             >
-              {label}
-            </a>
+              {l.label}
+            </Link>
           ))}
         </nav>
 
-        <div className="flex items-center gap-5">
+        <div className="flex items-center gap-4">
           {SOCIALS.map(({ label, href, Icon }) => (
             <a
               key={label}
@@ -52,20 +45,17 @@ export default function Footer() {
               target={href.startsWith("http") ? "_blank" : undefined}
               rel="noreferrer"
               aria-label={label}
-              className="border border-line p-2.5 text-mut transition-all duration-300 hover:border-acc hover:text-acc"
+              className="border border-line p-2.5 text-mut transition-all duration-300 hover:-translate-y-0.5 hover:border-acc hover:text-acc"
             >
-              <Icon size={17} />
+              <Icon size={16} />
             </a>
           ))}
-          <button
-            onClick={toTop}
-            aria-label="Наверх"
-            className="group border border-line p-2.5 text-mut transition-all duration-300 hover:border-ink hover:bg-ink hover:text-coal"
-          >
-            <ArrowUp size={17} className="transition-transform duration-300 group-hover:-translate-y-0.5" />
-          </button>
         </div>
       </div>
+
+      <p className="border-t border-line/60 py-4 text-center font-display text-xs italic text-mut/80">
+        Loving light and capturing moments
+      </p>
     </footer>
   );
 }
