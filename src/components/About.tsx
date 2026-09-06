@@ -16,17 +16,17 @@ function Stat({ target, suffix = "", label }: { target: number; suffix?: string;
 }
 
 const GEAR = [
-  ["Leica M6", "Summicron 35 ƒ/2 · улица"],
-  ["Fujifilm GFX 50S II", "GF 45 / 110 / 120 · студия и город"],
-  ["Hasselblad 500 C/M", "Planar 80 ƒ/2.8 · портрет"],
-  ["Kodak Tri-X · Portra 400", "плёнка, проявка дома"],
+  ["Canon R8", "полнокадровая беззеркалка · основная"],
+  ["Canon EF 35mm ƒ/2.0", "улица и репортаж"],
+  ["Canon RF 24-50mm ƒ/4.5-6.3", "архитектура и поездки"],
+  ["Canon EF 75-300mm ƒ/4.0-5.6", "телевик · портрет и детали"],
 ];
 
 /** Обо мне: липкая левая колонка, справа — биография, счётчики, техника. */
 export default function About() {
   return (
     <section id="about" className="scroll-mt-20 border-t border-line px-5 py-20 md:px-10 md:py-28">
-      <SectionHead no="03 — Обо мне" title="Артём Волков" note="Москва · с 2013 года\nплёнка + цифра" />
+      <SectionHead no="03 — Обо мне" title="Арсений Бабанов" note="Москва · с 2018 года\nCanon R8" />
 
       <div className="grid gap-12 lg:grid-cols-12">
         {/* Sticky-колонка */}
@@ -38,8 +38,8 @@ export default function About() {
               </p>
               <div className="mt-8 space-y-2 font-mono text-[11px] uppercase tracking-[0.2em] text-mut">
                 <p>База — Москва</p>
-                <p>География — весь мир</p>
-                <p>Печать — собственная лаборатория</p>
+                <p>География — куда доедет свет</p>
+                <p>Архив — с 2018 года</p>
               </div>
             </Reveal>
           </div>
@@ -50,33 +50,32 @@ export default function About() {
           <div className="max-w-2xl space-y-5 text-base leading-relaxed text-mut md:text-lg">
             <Reveal>
               <p>
-                Началось всё с дедовского «Зенита» и ванной, превращённой в тёмную комнату.
-                Двенадцать лет спустя камеры сменились, а принцип остался:{" "}
+                Всё началось в 2018 году с первой камеры и долгих прогулок по Москве.
+                С тех пор техника сменилась, а принцип остался:{" "}
                 <span className="text-ink">кадр должен дышать, а не объяснять</span>.
               </p>
             </Reveal>
             <Reveal delay={100}>
               <p>
-                Работаю на стыке документалистики и постановки: стрит учит скорости,
-                студия — терпению. Снимаю для медиа, архитектурных бюро и брендов,
-                а собственные серии до сих пор печатаю под красной лампой — вручную,
-                на баритовой бумаге.
+                Работаю на стыке документалистики и постановки: улица учит скорости,
+                студия — терпению. Снимаю людей, архитектуру и тихие вещи,
+                а отдельной любовью остаётся чёрно-белое — графика, в которой
+                свет говорит сам за себя.
               </p>
             </Reveal>
             <Reveal delay={180}>
               <p>
-                Веду воркшопы по уличной фотографии и плёночной печати.
+                За плечами шесть выставок и дипломы лауреатов фотоконкурсов.
                 Верю, что хороший снимок — это пауза, в которой видно, как движется время.
               </p>
             </Reveal>
           </div>
 
           {/* Счётчики */}
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-            <Stat target={12} label="Лет за камерой" />
-            <Stat target={26} label="Авторских серий" />
-            <Stat target={148000} label="Кадров в архиве" />
-            <Stat target={40} suffix="+" label="Публикаций" />
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
+            <Stat target={8} label="Лет за камерой" />
+            <Stat target={6} label="Выставок" />
+            <Stat target={4} suffix="+" label="Дипломов лауреата" />
           </div>
 
           {/* Техника */}

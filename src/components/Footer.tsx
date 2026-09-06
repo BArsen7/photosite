@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { LogoMark, TgIcon, IgIcon, MailIcon } from "./Icons";
+import { LogoMark, TgIcon, VkIcon, MailIcon } from "./Icons";
 
 const NAV = [
   { to: "/portfolio", label: "Портфолио" },
@@ -9,9 +9,9 @@ const NAV = [
 ];
 
 const SOCIALS = [
-  { label: "Telegram", href: "https://t.me/volkov_foto", Icon: TgIcon },
-  { label: "Instagram", href: "https://instagram.com/volkov.foto", Icon: IgIcon },
-  { label: "Email", href: "mailto:hello@volkov.photo", Icon: MailIcon },
+  { label: "Telegram", href: "https://t.me/BArsen7", Icon: TgIcon },
+  { label: "ВКонтакте", href: "https://vk.com/arsen27", Icon: VkIcon },
+  { label: "Email", href: "mailto:arseniy.babanov@yandex.ru", Icon: MailIcon },
 ];
 
 /** Подвал: копирайт слева, навигация по центру, соцсети справа. */
@@ -22,7 +22,7 @@ export default function Footer() {
         <div className="flex items-center gap-3">
           <LogoMark size={20} className="text-acc" />
           <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-mut">
-            © 2026 Артём Волков · Все права защищены
+            © 2026 Арсений Бабанов · Все права защищены
           </p>
         </div>
 
@@ -55,7 +55,7 @@ export default function Footer() {
       </div>
 
       <p className="border-t border-line/60 py-4 text-center font-display text-xs italic text-mut/80">
-        Люблю свет и ловлю моменты
+        Ищу свет и ловлю моменты
       </p>
     </footer>
   );

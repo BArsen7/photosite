@@ -38,14 +38,14 @@ export default function Hero() {
           className="fadeup font-display text-[clamp(3.4rem,10vw,8.5rem)] font-semibold leading-[0.95] tracking-tight"
           style={{ animationDelay: "120ms" }}
         >
-          Артём <span className="italic text-acc">Волков</span>
+          Арсений <span className="italic text-acc">Бабанов</span>
         </h1>
 
         <p
           className="fadeup mt-6 font-display text-lg italic text-ink/85 md:text-2xl"
           style={{ animationDelay: "240ms" }}
         >
-          Люблю свет и ловлю моменты
+          Ищу свет и ловлю моменты
         </p>
 
         <div className="fadeup mt-11" style={{ animationDelay: "360ms" }}>

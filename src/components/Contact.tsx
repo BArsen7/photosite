@@ -3,7 +3,7 @@ import SectionHead from "./SectionHead";
 import { LineReveal, Reveal } from "../lib/motion";
 import { submitInquiry } from "../lib/api";
 import { GENRES } from "../data/photos";
-import { MailIcon, PinIcon, SendIcon, TgIcon, CheckIcon } from "./Icons";
+import { MailIcon, PinIcon, SendIcon, TgIcon, VkIcon, CheckIcon } from "./Icons";
 
 type Status = "idle" | "sending" | "done";
 type Errors = Partial<Record<"name" | "email" | "message", string>>;
@@ -68,16 +68,22 @@ export default function Contact() {
           </h3>
 
           <div className="mt-12 space-y-5">
-            <a href="mailto:hello@volkov.photo" className="group flex items-center gap-4">
+            <a href="mailto:arseniy.babanov@yandex.ru" className="group flex items-center gap-4">
               <MailIcon size={18} className="text-mut transition-colors group-hover:text-acc" />
               <span className="font-mono text-sm tracking-[0.12em] text-ink underline decoration-line underline-offset-8 transition-colors group-hover:decoration-acc">
-                hello@volkov.photo
+                arseniy.babanov@yandex.ru
               </span>
             </a>
-            <a href="https://t.me/volkov_foto" target="_blank" rel="noreferrer" className="group flex items-center gap-4">
+            <a href="https://t.me/BArsen7" target="_blank" rel="noreferrer" className="group flex items-center gap-4">
               <TgIcon size={18} className="text-mut transition-colors group-hover:text-acc" />
               <span className="font-mono text-sm tracking-[0.12em] text-ink underline decoration-line underline-offset-8 transition-colors group-hover:decoration-acc">
-                @volkov_foto
+                @BArsen7
+              </span>
+            </a>
+            <a href="https://vk.com/arsen27" target="_blank" rel="noreferrer" className="group flex items-center gap-4">
+              <VkIcon size={18} className="text-mut transition-colors group-hover:text-acc" />
+              <span className="font-mono text-sm tracking-[0.12em] text-ink underline decoration-line underline-offset-8 transition-colors group-hover:decoration-acc">
+                vk.com/arsen27
               </span>
             </a>
             <p className="flex items-center gap-4">

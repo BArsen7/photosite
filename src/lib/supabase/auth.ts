@@ -7,7 +7,7 @@ export interface AdminSession {
 }
 
 const DEMO_KEY = "av_admin_session";
-export const DEMO_ADMIN_EMAIL = "admin@volkov.photo";
+export const DEMO_ADMIN_EMAIL = "arseniy.babanov@yandex.ru";
 
 export { isSupabaseConfigured } from "./browser";
 
@@ -35,7 +35,7 @@ export type SignInResult = { ok: true; session: AdminSession } | { ok: false; er
 
 /**
  * Вход: Supabase Auth (signInWithPassword). Без ключей — демо-режим:
- * admin@volkov.photo + любой пароль от 6 символов.
+ * arseniy.babanov@yandex.ru + любой пароль от 6 символов.
  */
 export async function signIn(email: string, password: string): Promise<SignInResult> {
   const supabase = await loadSupabase();

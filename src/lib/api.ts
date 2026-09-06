@@ -106,6 +106,7 @@ const LOCAL_CATEGORIES: DbCategory[] = [
   { id: "cat-architecture", name: "Архитектура", slug: "architecture" },
   { id: "cat-still-life", name: "Натюрморт", slug: "still-life" },
   { id: "cat-landscapes", name: "Пейзаж", slug: "landscapes" },
+  { id: "cat-bw", name: "Чёрно-белое", slug: "bw" },
 ];
 
 const LOCAL_PROJECTS: DbProject[] = [
@@ -123,11 +124,21 @@ const LOCAL_PROJECTS: DbProject[] = [
     id: "prj-faces",
     title: "Лица",
     slug: "faces",
-    description: "Люди при свете окна и при свете лампы. Плёнка, средний формат.",
+    description: "Люди при свете окна и при свете лампы. Canon R8, естественный свет.",
     location: "Москва · Санкт-Петербург",
     date: "2024-06-01",
     category_id: "cat-portraits",
-    cover_image_url: PHOTOS[1].src,
+    cover_image_url: PHOTOS[7].src,
+  },
+  {
+    id: "prj-mono",
+    title: "Монохром",
+    slug: "monokhrom",
+    description: "Чёрно-белые кадры: люди, ритмы и геометрия без цвета.",
+    location: "Москва · Тбилиси",
+    date: "2024-08-14",
+    category_id: "cat-bw",
+    cover_image_url: PHOTOS[4].src,
   },
   {
     id: "prj-concrete",
@@ -164,15 +175,16 @@ const LOCAL_PROJECTS: DbProject[] = [
 /** Привязка кадров к проектам для демо-данных. */
 const PHOTO_TO_PROJECT: Record<string, string> = {
   "fr-01": "prj-silence",
-  "fr-05": "prj-silence",
-  "fr-02": "prj-faces",
   "fr-08": "prj-faces",
   "fr-03": "prj-concrete",
-  "fr-07": "prj-concrete",
   "fr-06": "prj-still",
   "fr-09": "prj-still",
   "fr-04": "prj-north",
   "fr-10": "prj-north",
+  /* чёрно-белые кадры — в отдельную серию */
+  "fr-02": "prj-mono",
+  "fr-05": "prj-mono",
+  "fr-07": "prj-mono",
 };
 
 /* ratio → реальные пиксели (для aspect-ratio карточек masonry) */
