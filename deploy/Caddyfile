@@ -1,0 +1,8 @@
+# TLS-прокси: Caddy сам получает и продлевает Let's Encrypt-сертификат.
+# Замените babanov.photo на свой домен.
+# reverse_proxy указывает на сервис web в той же compose-сети.
+
+babanov.photo {
+	encode gzip
+	reverse_proxy web:80
+}

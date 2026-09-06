@@ -117,9 +117,9 @@ export default function AdminManagePage() {
     const target = pendingPhoto;
     setPendingPhoto(null);
     try {
-      await deletePhotoRecord(target);
+      await deletePhotoRecord(target.id);
       setData((d) => (d ? { ...d, photos: d.photos.filter((p) => p.id !== target.id) } : d));
-      notify("Кадр удалён из архива и Storage");
+      notify("Кадр удалён из базы и с диска");
     } catch (e) {
       notify(e instanceof Error ? e.message : "Не удалось удалить кадр", "err");
     }
@@ -131,7 +131,7 @@ export default function AdminManagePage() {
     const target = pendingProject;
     setPendingProject(null);
     try {
-      await deleteProjectRecord(target, data?.photos ?? []);
+      await deleteProjectRecord(target.id);
       setData((d) =>
         d
           ? {
@@ -376,7 +376,7 @@ export default function AdminManagePage() {
       <ConfirmDialog
         open={!!pendingPhoto}
         heading="Удалить кадр?"
-        message="Кадр будет удалён из базы данных, а его файл — из Supabase Storage. Действие необратимо."
+        message="Кадр будет удалён из базы данных, а его файл — с диска сервера. Действие необратимо."
         onCancel={() => setPendingPhoto(null)}
         onConfirm={confirmDeletePhoto}
       >

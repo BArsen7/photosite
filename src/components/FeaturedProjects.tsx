@@ -1,12 +1,41 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Photo from "./Photo";
 import { ArrowUpRight } from "./Icons";
 import { Reveal } from "../lib/motion";
-import { FEATURED_PROJECTS } from "../data/projects";
+import { fetchPortfolio, projectSlug } from "../lib/api";
+import { FEATURED_PROJECTS, type Project } from "../data/projects";
 
-/** «Featured Projects»: сетка из трёх избранных проектов (моковые данные).
- *  Средняя карточка слегка смещена вниз — ритм, а не ровный ряд. */
+/** «Избранные проекты»: три последних проекта с обложками из архива;
+ *  пока архив пуст — аккуратные моки-заглушки из data/projects.ts. */
 export default function FeaturedProjects() {
+  const [projects, setProjects] = useState<Project[] | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchPortfolio().then((data) => {
+      if (cancelled) return;
+      const catName = new Map(data.categories.map((c) => [c.id, c.name]));
+      /* Берём самые свежие проекты, у которых есть обложка */
+      const live = data.projects
+        .filter((p) => !!p.cover_image_url)
+        .slice(0, 3)
+        .map((p) => ({
+          id: projectSlug(p),
+          title: p.title,
+          category: catName.get(p.category_id) ?? "Серия",
+          year: p.date ? Number(p.date.slice(0, 4)) : new Date().getFullYear(),
+          location: p.location ?? "",
+          description: p.description ?? "",
+          cover: p.cover_image_url as string,
+        }));
+      setProjects(live.length > 0 ? live : FEATURED_PROJECTS);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <section className="px-5 py-20 md:px-10 md:py-28">
       <Reveal className="mb-14 flex flex-wrap items-end justify-between gap-6">
@@ -30,50 +59,62 @@ export default function FeaturedProjects() {
         </Link>
       </Reveal>
 
-      {/* mobile-first: одна колонка, от md — три */}
-      <div className="grid gap-x-6 gap-y-16 md:grid-cols-3">
-        {FEATURED_PROJECTS.map((p, i) => (
-          <Reveal key={p.id} delay={i * 130} className={i === 1 ? "md:translate-y-10" : ""}>
-            <Link to={`/portfolio/${p.id}`} className="group block" aria-label={`Проект «${p.title}»`}>
-              <div className="relative overflow-hidden">
-                <Photo
-                  src={p.cover}
-                  alt={`${p.title} — обложка проекта`}
-                  ratio="3/4"
-                  /* 3 колонки от md (768px), до того — одна */
-                  sizes="(min-width: 768px) 33vw, 100vw"
-                  imgClassName="transition-transform duration-700 ease-out group-hover:scale-[1.05]"
-                />
+      {!projects ? (
+        /* Скелетоны, пока архив читается */
+        <div className="grid gap-x-6 gap-y-16 md:grid-cols-3">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className={i === 1 ? "md:translate-y-10" : ""}>
+              <div className="skeleton-pulse" style={{ aspectRatio: "3/4" }} />
+              <div className="skeleton-pulse mt-5 h-7 w-2/3" />
+              <div className="skeleton-pulse mt-2 h-4 w-1/3" />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="grid gap-x-6 gap-y-16 md:grid-cols-3">
+          {projects.map((p, i) => (
+            <Reveal key={p.id} delay={i * 130} className={i === 1 ? "md:translate-y-10" : ""}>
+              <Link to={`/portfolio/${p.id}`} className="group block" aria-label={`Проект «${p.title}»`}>
+                <div className="relative overflow-hidden">
+                  <Photo
+                    src={p.cover}
+                    alt={`${p.title} — обложка проекта`}
+                    ratio="3/4"
+                    sizes="(min-width: 768px) 33vw, 100vw"
+                    imgClassName="transition-transform duration-700 ease-out group-hover:scale-[1.05]"
+                  />
 
-                {/* Номер проекта */}
-                <span className="absolute left-4 top-4 z-10 font-mono text-[10px] tracking-[0.25em] text-ink/90 mix-blend-difference">
-                  0{i + 1}
-                </span>
+                  <span className="absolute left-4 top-4 z-10 font-mono text-[10px] tracking-[0.25em] text-ink/90 mix-blend-difference">
+                    0{i + 1}
+                  </span>
 
-                {/* Затемнение + «View project» появляются при наведении */}
-                <div
-                  className="absolute inset-0 bg-gradient-to-t from-coal/75 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-                  aria-hidden="true"
-                />
-                <span className="absolute bottom-4 right-4 z-10 flex translate-y-2 items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-acc opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100">
-                  Открыть проект <ArrowUpRight size={14} />
-                </span>
-              </div>
+                  <div
+                    className="absolute inset-0 bg-gradient-to-t from-coal/75 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+                    aria-hidden="true"
+                  />
+                  <span className="absolute bottom-4 right-4 z-10 flex translate-y-2 items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-acc opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100">
+                    Открыть проект <ArrowUpRight size={14} />
+                  </span>
+                </div>
 
-              <div className="mt-5 flex items-baseline justify-between gap-4">
-                <h3 className="font-display text-2xl font-semibold tracking-tight transition-colors duration-300 group-hover:text-acc">
-                  {p.title}
-                </h3>
-                <span className="font-mono text-[10px] tracking-[0.2em] text-mut">{p.year}</span>
-              </div>
-              <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.22em] text-mut">
-                {p.category} · {p.location}
-              </p>
-              <p className="mt-3 text-sm leading-relaxed text-mut">{p.description}</p>
-            </Link>
-          </Reveal>
-        ))}
-      </div>
+                <div className="mt-5 flex items-baseline justify-between gap-4">
+                  <h3 className="font-display text-2xl font-semibold tracking-tight transition-colors duration-300 group-hover:text-acc">
+                    {p.title}
+                  </h3>
+                  <span className="font-mono text-[10px] tracking-[0.2em] text-mut">{p.year}</span>
+                </div>
+                <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.22em] text-mut">
+                  {p.category}
+                  {p.location ? ` · ${p.location}` : ""}
+                </p>
+                {p.description && (
+                  <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-mut">{p.description}</p>
+                )}
+              </Link>
+            </Reveal>
+          ))}
+        </div>
+      )}
     </section>
   );
 }

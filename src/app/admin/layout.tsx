@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { LogoMark, GridIcon, UploadIcon, LayersIcon, FilmIcon, ExitIcon, CloseIcon } from "../../components/Icons";
-import { signOut } from "../../lib/supabase/auth";
-import { isSupabaseConfigured } from "../../lib/supabase/browser";
+import { LogoMark, GridIcon, UploadIcon, LayersIcon, FilmIcon, MailIcon, ExitIcon, CloseIcon } from "../../components/Icons";
+import { signOut } from "../../lib/auth";
 import { useAdminSession } from "../../middleware";
 import { useLockBody } from "../../lib/motion";
 
@@ -11,6 +10,7 @@ const NAV = [
   { to: "/admin/upload", label: "Загрузка кадра", Icon: UploadIcon, end: false },
   { to: "/admin/projects", label: "Проекты", Icon: LayersIcon, end: false },
   { to: "/admin/manage", label: "Архив", Icon: FilmIcon, end: false },
+  { to: "/admin/inquiries", label: "Заявки", Icon: MailIcon, end: false },
 ];
 
 /**
@@ -74,13 +74,8 @@ export default function AdminLayout() {
       {/* Низ: статус подключения, пользователь, выход */}
       <div className="border-t border-line px-6 py-5">
         <p className="flex items-center gap-2.5 font-mono text-[9px] uppercase tracking-[0.22em]">
-          <span
-            className={`pulsedot h-1.5 w-1.5 rounded-full ${isSupabaseConfigured ? "bg-[#6fae7a]" : "bg-acc"}`}
-            aria-hidden="true"
-          />
-          <span className={isSupabaseConfigured ? "text-[#6fae7a]" : "text-acc"}>
-            {isSupabaseConfigured ? "Supabase · подключён" : "Демо-режим"}
-          </span>
+          <span className="pulsedot h-1.5 w-1.5 rounded-full bg-[#6fae7a]" aria-hidden="true" />
+          <span className="text-[#6fae7a]">Локально · SQLite</span>
         </p>
         <p className="mt-3 truncate font-mono text-[10px] tracking-[0.08em] text-mut" title={session?.email}>
           {session?.email ?? "—"}

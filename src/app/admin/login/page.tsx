@@ -1,15 +1,14 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { LogoMark, ArrowUpRight, CheckIcon } from "../../../components/Icons";
-import { signIn, DEMO_ADMIN_EMAIL } from "../../../lib/supabase/auth";
-import { isSupabaseConfigured } from "../../../lib/supabase/browser";
-import { useAdminSession } from "../../../middleware";
+import { signIn } from "../../../lib/auth";
 import { usePageMeta } from "../../../lib/meta";
+import { useAdminSession } from "../../../middleware";
 
 /**
- * /admin/login — вход через Supabase Auth (signInWithPassword).
- * Без ключей Supabase — демо-режим с локальной сессией.
- * После успеха — редирект на адрес, с которого пришли (или dashboard).
+ * /admin/login — вход в локальную админку (JWT выдаёт контейнер app).
+ * Учётные данные создаются при первом запуске сервера:
+ * свои — через ADMIN_EMAIL/ADMIN_PASSWORD, иначе пароль виден в `docker compose logs app`.
  */
 export default function AdminLoginPage() {
   const { state, session } = useAdminSession();
@@ -22,8 +21,7 @@ export default function AdminLoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  /* Базовая защита от перебора: 5 неудач → локаут на 30 секунд.
-     (Основная защита — rate-limit самого Supabase Auth + RLS.) */
+  /* Пауза после перебора дублирует серверный rate limit и бережно к батарее кнопок */
   const [attempts, setAttempts] = useState(0);
   const [lockUntil, setLockUntil] = useState(0);
   const [now, setNow] = useState(() => Date.now());
@@ -37,9 +35,8 @@ export default function AdminLoginPage() {
   const lockSecs = Math.max(0, Math.ceil((lockUntil - now) / 1000));
   const locked = lockSecs > 0;
 
-  usePageMeta({ title: "Admin — вход", noindex: true });
+  usePageMeta({ title: "Админка — вход", noindex: true });
 
-  /* Уже залогинен — сразу в кабинет */
   if (state === "ok" && session) return <Navigate to={from} replace />;
 
   const onSubmit = async (e: FormEvent) => {
@@ -63,9 +60,8 @@ export default function AdminLoginPage() {
     if (res.ok) {
       navigate(from, { replace: true });
     } else {
-      /* Не раскрываем, существует ли аккаунт: сообщение всегда общее */
       const n = attempts + 1;
-      if (n >= 5) {
+      if (n >= 5 || /подождите/i.test(res.error)) {
         setLockUntil(Date.now() + 30_000);
         setNow(Date.now());
         setAttempts(0);
@@ -100,8 +96,8 @@ export default function AdminLoginPage() {
           </h1>
           <p className="mt-6 max-w-sm text-sm leading-relaxed text-mut">
             Служебный вход для работы с архивом: загрузка кадров,
-            управление проектами и категориями. Посетителям — через
-            парадную дверь.
+            управление проектами и заявками. Всё хранится локально —
+            база и файлы лежат прямо на сервере.
           </p>
         </div>
 
@@ -123,17 +119,16 @@ export default function AdminLoginPage() {
 
           <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-acc">Служебный доступ</p>
           <h2 className="mt-3 font-display text-4xl font-semibold tracking-tight">Вход</h2>
-          <p className="mt-3 text-sm text-mut">Email и пароль из Supabase Auth.</p>
+          <p className="mt-3 text-sm text-mut">Локальная учётная запись администратора.</p>
 
-          {!isSupabaseConfigured && (
-            <div className="mt-6 border border-acc/40 bg-acc/[0.06] px-4 py-3">
-              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-acc">Демо-режим</p>
-              <p className="mt-1.5 text-xs leading-relaxed text-mut">
-                Supabase не подключён. Вход: <span className="font-mono text-ink">{DEMO_ADMIN_EMAIL}</span> +
-                любой пароль от 6 символов.
-              </p>
-            </div>
-          )}
+          <div className="mt-6 border border-line bg-panel/50 px-4 py-3">
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-acc">Первый вход</p>
+            <p className="mt-1.5 text-xs leading-relaxed text-mut">
+              Email и пароль создаются при первом запуске: задайте их переменными
+              <span className="font-mono text-ink"> ADMIN_EMAIL / ADMIN_PASSWORD</span> или
+              посмотрите сгенерированный пароль в логе контейнера app.
+            </p>
+          </div>
 
           {error && (
             <div role="alert" className="mt-6 border border-err/50 bg-err/[0.08] px-4 py-3 text-sm text-err">
@@ -152,7 +147,7 @@ export default function AdminLoginPage() {
                 autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@studio.photo"
+                placeholder="admin@localhost"
                 className="w-full border border-line bg-panel px-4 py-3 font-mono text-sm text-ink outline-none transition-colors duration-300 placeholder:text-mut/50 focus:border-acc"
               />
             </div>
@@ -195,7 +190,7 @@ export default function AdminLoginPage() {
           </form>
 
           <p className="mt-8 text-center font-mono text-[9px] uppercase tracking-[0.22em] text-mut/70">
-            Сессия проверяется middleware на всех /admin/*
+            Сессия проверяется на всех /admin/* · JWT 7 дней
           </p>
         </div>
       </div>

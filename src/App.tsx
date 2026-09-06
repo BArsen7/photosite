@@ -10,7 +10,7 @@ import { RequireAuth, isProtectedPath } from "./middleware";
 
 /**
  * Админка вынесена в отдельные чанки (code splitting): посетители сайта
- * не скачивают Supabase SDK и страницы «тёмной комнаты».
+ * не скачивают страницы «тёмной комнаты» до входа.
  */
 const AdminLayout = lazy(() => import("./app/admin/layout"));
 const AdminLoginPage = lazy(() => import("./app/admin/login/page"));
@@ -18,6 +18,7 @@ const AdminDashboardPage = lazy(() => import("./app/admin/dashboard/page"));
 const AdminUploadPage = lazy(() => import("./app/admin/upload/page"));
 const AdminProjectsPage = lazy(() => import("./app/admin/projects/page"));
 const AdminManagePage = lazy(() => import("./app/admin/manage/page"));
+const AdminInquiriesPage = lazy(() => import("./app/admin/inquiries/page"));
 
 /** Сброс прокрутки при смене маршрута. */
 function ScrollToTop() {
@@ -80,9 +81,9 @@ export default function App() {
               <Route index element={<AdminDashboardPage />} />
               <Route path="upload" element={<AdminUploadPage />} />
               <Route path="projects" element={<AdminProjectsPage />} />
-              <Route path="manage" element={<AdminManagePage />} />
-            </Route>
-
+            <Route path="manage" element={<AdminManagePage />} />
+            <Route path="inquiries" element={<AdminInquiriesPage />} />
+          </Route>
             <Route path="*" element={<HomePage />} />
           </Routes>
         </Suspense>
