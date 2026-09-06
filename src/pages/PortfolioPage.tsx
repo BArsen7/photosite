@@ -20,7 +20,7 @@ export default function PortfolioPage() {
   const [active, setActive] = useState<string>(FILTER_ALL);
   const [lightbox, setLightbox] = useState<number | null>(null);
 
-  /* 4. Получение данных: categories + projects + photos из Supabase */
+  /* Получение данных: categories + projects + photos из локального API */
   useEffect(() => {
     let cancelled = false;
     fetchPortfolio().then((d) => {

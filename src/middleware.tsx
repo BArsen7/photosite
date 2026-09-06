@@ -1,29 +1,20 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import { getSession, type AdminSession } from "./lib/supabase/auth";
+import { getSession, type AdminSession } from "./lib/auth";
 
 /**
  * Защита маршрутов /admin/* (кроме /admin/login).
  *
- * В Next.js это server middleware (middleware.ts в корне), проверяющий
- * куки сессии через @supabase/ssr:
- *
- *   import { createServerClient } from "@supabase/ssr";
- *   import { NextResponse } from "next/server";
+ * Сессия проверяется у локального API (GET /api/admin/session с JWT).
+ * В Next.js этому соответствует серверный middleware:
  *
  *   export async function middleware(request: Request) {
- *     let response = NextResponse.next({ request });
- *     const supabase = createServerClient(URL, KEY, { cookies: {...} });
- *     const { data } = await supabase.auth.getUser();
- *     const isLogin = request.nextUrl.pathname === "/admin/login";
- *     if (!data.user && !isLogin)
+ *     const token = request.cookies.get("session")?.value;
+ *     // проверить подпись JWT / сделать запрос к API
+ *     if (!token && request.nextUrl.pathname !== "/admin/login")
  *       return NextResponse.redirect(new URL("/admin/login", request.url));
- *     return response;
  *   }
  *   export const config = { matcher: ["/admin/:path*"] };
- *
- * Здесь — клиентский аналог: хук useAdminSession + компонент <RequireAuth>,
- * который редиректит на /admin/login, запоминая исходный адрес.
  */
 export const ADMIN_PREFIX = "/admin";
 export const ADMIN_LOGIN = "/admin/login";

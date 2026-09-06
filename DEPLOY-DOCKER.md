@@ -1,278 +1,180 @@
-# Деплой через Docker на Banana Pi M4 Zero (4 ГБ ОЗУ)
+# Деплой на Banana Pi M4 Zero (Docker, полностью локально)
 
-Пошаговое развёртывание сайта-портфолио на одноплатнике **Banana Pi M4 Zero**
-(Rockchip RK3566, 4×Cortex-A55, **aarch64**, 4 ГБ ОЗУ).
+Сайт работает **целиком на плате**: статика в nginx, данные и файлы — в контейнере
+с Node-сервером (SQLite + JWT + загрузка фото). Внешние сервисы не используются:
+Supabase, облачные БД и CDN не нужны.
 
 ```
-                        ┌──────────────────────────────────────────┐
-  Интернет ──► роутер ──► Banana Pi M4 Zero                        │
-         (проброс 80/443) │  docker compose                        │
-                        │   ├─ web    nginx:alpine (dist/, ~10 МБ) │
-                        │   └─ caddy  (опц., авто-HTTPS)           │
-                        └────────────┬─────────────────────────────┘
-                                     │ HTTPS, данные на лету (из браузера)
-                                     ▼
-                        Supabase Cloud: Postgres · Auth · Storage
+Интернет → роутер (80/443) → Banana Pi M4 Zero
+                                 ├─ nginx  (web)   статика dist/ + отдача /uploads из volume
+                                 └─ node   (app)   /api: SQLite, JWT-вход, multer-загрузки
+                                        ↓
+                              volume portfolio-data
+                              (portfolio.db, uploads/, .jwt_secret)
 ```
 
-**Ключевая мысль:** фронтенд полностью статический — на плате живёт только
-nginx. Все данные, авторизация и файлы фотографий обрабатываются Supabase
-Cloud напрямую из браузера посетителя. 4 ГБ ОЗУ для этого — с огромным запасом.
+Ресурсы: рантайм ~90–120 МБ ОЗУ из 4 ГБ. Пиковая нагрузка — сборка образа
+(Vite + npm, до ~1,5 ГБ), поэтому на время первой сборки полезен swap.
 
 ---
 
 ## 1. Подготовка платы
 
-### 1.1. ОС и архитектура
-
-Подойдут Banana Pi OS (Debian) или Armbian. Проверьте архитектуру — должна быть
-`aarch64`:
-
-```bash
-uname -m
-# ожидаемо: aarch64
-
-cat /etc/os-release
-```
-
-### 1.2. Установка Docker
+Подойдёт Armbian / Debian bookworm (в образах Banana Pi OS тоже есть всё нужное).
 
 ```bash
 sudo apt update && sudo apt upgrade -y
-sudo apt install -y docker.io docker-compose-plugin
+
+# Docker + плагин compose
+sudo apt install -y docker.io docker-compose-plugin git
 sudo systemctl enable --now docker
+sudo usermod -aG docker $USER          # затем перелогиниться
 
-# чтобы работать без sudo:
-sudo usermod -aG docker $USER
-newgrp docker   # или перелогиньтесь
+# Проверка архитектуры (должно быть aarch64)
+uname -m
 
-# проверка:
-docker run --rm hello-world
-docker compose version
+# Проверка, что порт 80 свободен (в образах BPI бывает предустановлен Apache)
+sudo ss -tulpn | grep ':80 '
+# если занят: sudo systemctl disable --now apache2
 ```
 
-### 1.3. Освободите порт 80
-
-В образах Banana Pi OS с рабочего стола может быть поднят Apache:
-
-```bash
-sudo systemctl status apache2 2>/dev/null && sudo systemctl disable --now apache2
-```
-
-### 1.4. Swap на время сборки (рекомендуется)
-
-Сборка Vite внутри контейнера в пике потребляет ~1–1.5 ГБ. На 4 ГБ платы этого
-хватает, но страховка не помешает:
+**Swap на время сборки** (постоянно не нужен, но спасает от OOM):
 
 ```bash
 sudo fallocate -l 2G /swapfile
 sudo chmod 600 /swapfile
 sudo mkswap /swapfile
 sudo swapon /swapfile
-echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
 ```
 
 ---
 
-## 2. Код на плате
-
-Вариант А — через Git (рекомендуется, удобно обновляться):
+## 2. Код и переменные
 
 ```bash
-sudo apt install -y git
-cd ~ && git clone <URL-ВАШЕГО-РЕПОЗИТОРИЯ> portfolio && cd portfolio
-```
+git clone <URL-вашего-репозитория> ~/portfolio
+cd ~/portfolio
 
-Вариант Б — копирование папки с ПК:
-
-```bash
-# на ПК (из папки проекта):
-tar --exclude=node_modules --exclude=.git -czf portfolio.tar.gz .
-scp portfolio.tar.gz <user>@<IP-платы>:~/portfolio/
-
-# на плате:
-mkdir -p ~/portfolio && cd ~/portfolio && tar -xzf portfolio.tar.gz
-```
-
----
-
-## 3. Переменные окружения
-
-Создайте `.env` рядом с `docker-compose.yml` (значения — из
-Supabase → Settings → API):
-
-```bash
+# Учётные данные админки (задайте свои!)
 cat > .env <<'EOF'
-VITE_SUPABASE_URL=https://ВАШ-ПРОЕКТ.supabase.co
-VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIs...
+ADMIN_EMAIL=arseniy.babanov@yandex.ru
+ADMIN_PASSWORD=придумайте-надёжный-пароль
 EOF
-chmod 600 .env
 ```
 
-> Важно: Vite встраивает эти значения в JS **при сборке образа**. Поменяли
-> ключи — пересоберите образ (`docker compose build web`).
->
-> Без `.env` соберётся полностью рабочий **демо-режим** (локальный датасет,
-> вход в админку: `arseniy.babanov@yandex.ru` + любой пароль от 6 символов).
+Если `ADMIN_PASSWORD` не задать, сервер сгенерирует случайный и **напечатает его
+в лог при первом запуске** (`docker compose logs app`).
+
+> Переменные `VITE_*` здесь не нужны: фронтенд обращается к API относительными
+> путями, а nginx проксирует `/api` и `/uploads` на контейнер app.
 
 ---
 
-## 4. Сборка и запуск
-
-### 4.1. Сборка прямо на плате
+## 3. Сборка и запуск
 
 ```bash
 cd ~/portfolio
-docker compose build web     # ~5–15 минут на Cortex-A55 — это нормально
-docker compose up -d
+docker compose up -d --build
 ```
 
-### 4.2. Альтернатива: собрать на ПК и перенести образ
+- Первая сборка на Cortex-A55: **5–15 минут** — это нормально (npm ci + Vite).
+- Docker сам возьмёт образы для `linux/arm64`; у `better-sqlite3` есть готовые
+  prebuild под ARM64, компиляция обычно не требуется.
 
-Если не хочется грузить плату сборкой (или исходники не хочется класть на плату):
+Проверка:
 
 ```bash
-# на ПК (нужен Docker Desktop / buildx):
-docker buildx build --platform linux/arm64 \
-  --build-arg VITE_SUPABASE_URL="https://..." \
-  --build-arg VITE_SUPABASE_ANON_KEY="eyJ..." \
-  -t babanov-portfolio:latest --load .
-
-docker save babanov-portfolio:latest | gzip > portfolio-arm64.tar.gz
-scp portfolio-arm64.tar.gz <user>@<IP-платы>:~/
-
-# на плате:
-gunzip -c ~/portfolio-arm64.tar.gz | docker load
-cd ~/portfolio
-docker compose up -d --no-build
+docker compose ps                 # оба сервиса Up
+docker compose logs app           # строка «ПЕРВЫЙ ВХОД В АДМИН-ПАНЕЛЬ» (если пароль генерировался)
+curl -I http://localhost/         # 200 от nginx
+curl http://localhost/api/portfolio   # JSON с категориями (6 шт., уже засеяны)
 ```
 
-### 4.3. Проверка
+Откройте `http://<IP-платы>/` — сайт работает. Админка: `http://<IP-платы>/#/admin/login`.
 
-```bash
-docker compose ps                # статус: running (healthy)
-docker compose logs -f web       # логи nginx
-curl -I http://localhost/        # HTTP/1.1 200 OK
-```
+---
 
-Откройте `http://<IP-платы>/` с любого устройства в локальной сети.
-Админка: `http://<IP-платы>/#/admin`.
+## 4. Первый вход и наполнение
+
+1. `/#/admin/login` → email/пароль из `.env` (или из `docker compose logs app`).
+2. **Проекты** → создайте серии (название, slug, категория, дата, обложка).
+3. **Загрузка кадра** → файл (до 25 МБ) + EXIF; файл кладётся в volume, строка — в БД.
+4. Публичное портфолио, фильтры и страницы `/portfolio/<slug>` подхватят данные сразу.
+5. Заявки с формы контактов копятся в **Заявках** (раздел админки).
 
 ---
 
 ## 5. Доступ из интернета
 
-### 5.1. Статический адрес платы
-
-Закрепите за платой IP в DHCP-настройках роутера (или задайте статический
-в `/etc/network/interfaces` / NetworkManager).
-
-### 5.2. Проброс портов
-
-В панели роутера: внешний порт **80** (и **443**, если будет Caddy) →
-внутренний IP платы, те же порты, протокол TCP.
-
-### 5.3. Домен
-
-- Купите домен и создайте **A-запись** на ваш белый IP.
-- Если IP динамический — настройте DDNS (например, `ddclient`):
-
-```bash
-sudo apt install -y ddclient
-# настройка: sudo dpkg-reconfigure ddclient
-```
-
-### 5.4. Фаервол (опционально)
-
-```bash
-sudo apt install -y ufw
-sudo ufw allow 22/tcp
-sudo ufw allow 80/tcp
-sudo ufw allow 443/tcp
-sudo ufw enable
-```
+1. На роутере: проброс `80` (и `443`) на IP платы.
+2. Домен: A-запись на ваш внешний IP; при «сером»/динамическом IP — DDNS
+   (`ddclient` на плате + поддержка у регистратора).
+3. **HTTPS** — в `docker-compose.yml` раскомментируйте сервис `caddy`
+   и впишите домен в `deploy/Caddyfile`. Caddy сам выпустит и будет продлевать
+   сертификат Let's Encrypt (нужны открытые 80/443 и публичный домен).
+   > При включённом caddy уберите проброс 80 на web: caddy займёт 80/443 сам.
 
 ---
 
-## 6. HTTPS через Caddy (автосертификат Let's Encrypt)
-
-Caddy сам выпускает и продлевает сертификат — никакого certbot.
-
-1. Впишите свой домен в `deploy/Caddyfile` (вместо `babanov.photo`).
-2. Отредактируйте `docker-compose.yml`:
-
-   - в сервисе `web`: закомментируйте `- "80:80"` и раскомментируйте
-     `- "127.0.0.1:8080:80"`;
-   - раскомментируйте сервис `caddy` и блок `volumes` в конце файла.
-
-3. Запустите:
-
-```bash
-docker compose up -d --build
-docker compose logs -f caddy     # следите за получением сертификата
-```
-
-Через минуту сайт доступен по `https://ваш-домен` с валидным сертификатом.
-
----
-
-## 7. Обновление сайта
+## 6. Обновление сайта
 
 ```bash
 cd ~/portfolio
-git pull                        # или распакуйте свежий tar.gz
-docker compose build web        # пересборка (секреты — из .env)
-docker compose up -d            # nginx подменит контейнер за пару секунд
+git pull
+docker compose build web          # фронтенд (app — только если менялся server/)
+docker compose up -d
 ```
 
-Данные в Supabase при этом **не затрагиваются** — база живёт в облаке.
+Данные лежат в volume и при пересборке **не затрагиваются**.
+`index.html` отдаётся с `no-cache`, поэтому пользователи увидят новую версию сразу.
 
 ---
 
-## 8. Наблюдение и обслуживание
+## 7. Резервное копирование и перенос
+
+Весь сайт (БД, фото, секрет сессий) — в volume `portfolio-data`:
 
 ```bash
-docker stats                    # ОЗУ/CPU в реальном времени (nginx: ~10 МБ)
-docker compose logs --tail=50 web
-docker system prune -f          # очистка старых слоёв после обновлений
+# Бэкап
+docker compose stop app
+sudo tar -czf portfolio-backup-$(date +%F).tar.gz \
+  -C /var/lib/docker/volumes/portfolio_portfolio-data _data
+docker compose start app
+
+# Восстановление на этой же или другой плате
+docker compose stop app
+sudo tar -xzf portfolio-backup-*.tar.gz \
+  -C /var/lib/docker/volumes/portfolio_portfolio-data
+docker compose start app
 ```
 
-Логи контейнера ограничены в compose (3 файла по 5 МБ) — диск не забьётся.
+(имя volume уточните в `docker volume ls`)
 
-### Про «а если Supabase тоже локально?»
+---
 
-Полный self-hosted Supabase на 4 ГБ **запустится впритык**
-(Postgres + GoTrue + PostgREST + Storage + Kong ≈ 2.5–3 ГБ, Studio лучше
-отключить). Для сайта-портфолио разумнее Supabase Cloud (Free-тарифа хватает
-с запасом), а плату оставить под фронтенд — так система дышит свободно.
+## 8. Локальная разработка (без Docker)
+
+```bash
+# 1) бэкенд (порт 3000, данные в server/data)
+cd server && npm install
+ADMIN_EMAIL=admin@localhost ADMIN_PASSWORD=secret123 npm start
+
+# 2) фронтенд (порт 5173)
+npm install
+echo "VITE_API_URL=http://localhost:3000" > .env.development
+npm run dev
+```
 
 ---
 
 ## 9. Частые проблемы
 
-| Симптом | Причина | Решение |
-| --- | --- | --- |
-| `port is already allocated` | Порт 80 занят | `sudo systemctl stop apache2` (или nginx вне Docker) |
-| Сайт открылся, но данные демо-режима | Ключи не попали в образ | Проверьте `.env`, затем `docker compose build --no-cache web && docker compose up -d` |
-| Сборка падает с OOM | Не хватило ОЗУ на `npm run build` | Добавьте swap (п. 1.4) или соберите образ на ПК (п. 4.2) |
-| `docker compose` не найден | Старый `docker-compose` | `sudo apt install docker-compose-plugin` |
-| Домен не открывается снаружи | Проброс/DNS/DDNS | Проверьте `curl ifconfig.me` = IP в A-записи; роутер-проброс |
-| Caddy не получает сертификат | Порт 80/443 закрыт извне | Откройте проброс; проверьте, что домен указывает на ваш IP |
-| `exec format error` | Образ собран под x86_64 | Пересоберите с `--platform linux/arm64` или прямо на плате |
-
----
-
-## 10. Итоговая памятка команд
-
-```bash
-# первый запуск
-docker compose up -d --build
-
-# обновление
-git pull && docker compose build web && docker compose up -d
-
-# статус / логи / перезапуск
-docker compose ps
-docker compose logs -f
-docker compose restart
-```
+| Симптом | Причина / решение |
+| --- | --- |
+| `exec format error` при запуске | Образ собран не под ARM64. Собирайте на плате, либо на ПК: `docker buildx build --platform linux/arm64 ...` |
+| Сборка падает с OOM (137) | Включите swap (раздел 1) |
+| Порт 80 занят | `sudo ss -tulpn \| grep ':80 '` → выключите apache2/nginx с платы |
+| 502 на `/api/...` | Контейнер app не поднялся: `docker compose logs app` |
+| После деплоя «сайт без фото» | Фото лежат в volume; проверьте, что volume смонтирован у обоих сервисов (`docker compose config`) |
+| Забыл пароль админки | Задать `ADMIN_PASSWORD`, удалить строку админа в БД или volume целиком — сервер пересоздаст при старте |
+| Сессии слетают после пересборки | Секрет JWT хранится в volume; не удаляйте `portfolio-data` |

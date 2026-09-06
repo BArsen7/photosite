@@ -1,39 +1,52 @@
-# syntax=docker/dockerfile:1
+# Multi-stage сборка. Всё работает на одноплатнике (linux/arm64), без внешних сервисов.
+#   docker compose build         — оба сервиса
+#   docker compose up -d
 #
-# Сайт-портфолио: многоэтапная сборка.
-# Этап 1 собирает статику (Vite), этап 2 раздаёт её nginx'ом.
-# Итоговый образ — linux/arm64-совместимый (Banana Pi M4 Zero, Raspberry Pi,
-# любой aarch64-сервер), итоговый размер ~45 МБ, в рантайме ~10 МБ ОЗУ.
+# Цели:
+#   web  — nginx + статическая сборка Vite (dist/)
+#   app  — Node-сервер (SQLite + JWT + загрузка фото)
 
-# ── Этап 1. Сборка ─────────────────────────────────────────────────────────
-FROM node:20-alpine AS build
+# ── 1) Сборка фронтенда ─────────────────────────────────────────────────
+FROM node:20-alpine AS web-build
 WORKDIR /app
-
-# Зависимости отдельным слоем — кэш жив, пока package*.json не менялись
 COPY package.json package-lock.json ./
-RUN npm ci --no-audit --no-fund
-
-# VITE_* встраиваются в бандл НА ЭТАПЕ СБОРКИ (особенность Vite).
-# Значения приходят из docker-compose (args) → .env файл.
-# Без ключей соберётся полностью рабочий демо-режим.
-ARG VITE_SUPABASE_URL=""
-ARG VITE_SUPABASE_ANON_KEY=""
-ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL \
-    VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY
-
+RUN npm ci
 COPY . .
+# Относительные пути API: в проде nginx проксирует /api и /uploads на app
+ARG VITE_API_URL=
+ENV VITE_API_URL=$VITE_API_URL
 RUN npm run build
 
-# ── Этап 2. Раздача ────────────────────────────────────────────────────────
-FROM nginx:1.27-alpine
+# ── 2) Зависимости бэкенда (отдельно, чтобы кэшировать слой) ────────────
+FROM node:20-alpine AS app-deps
+WORKDIR /app
+COPY server/package.json ./
+# Инструменты сборки — страховка, если для better-sqlite3 не найдётся
+# готового prebuild под вашу платформу; удаляются сразу после npm install
+RUN apk add --no-cache python3 make g++ \
+    && npm install --omit=dev \
+    && apk del python3 make g++ \
+    && rm -rf /var/cache/apk/*
 
+# ── 3) Рантайм бэкенда ──────────────────────────────────────────────────
+FROM node:20-alpine AS app
+WORKDIR /app
+ENV NODE_ENV=production \
+    DATA_DIR=/data
+COPY --from=app-deps /app/node_modules ./node_modules
+COPY server/package.json server/index.js ./
+VOLUME ["/data"]
+EXPOSE 3000
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
+  CMD wget -qO- http://127.0.0.1:3000/api/portfolio >/dev/null || exit 1
+CMD ["node", "index.js"]
+
+# ── 4) Статика (nginx) ──────────────────────────────────────────────────
+FROM nginx:1.27-alpine AS web
 COPY deploy/nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=build /app/dist /usr/share/nginx/html
-
+COPY --from=web-build /app/dist /usr/share/nginx/html
+VOLUME ["/data"]
 EXPOSE 80
-
-# Liveness-проверка: пригодится для docker compose ps / оркестраторов
-HEALTHCHECK --interval=30s --timeout=3s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://127.0.0.1/ || exit 1
-
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
+  CMD wget -qO- http://127.0.0.1:80/ >/dev/null || exit 1
 CMD ["nginx", "-g", "daemon off;"]

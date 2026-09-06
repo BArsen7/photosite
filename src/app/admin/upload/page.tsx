@@ -1,61 +1,54 @@
-import { useEffect, useRef, useState, type DragEvent, type FormEvent } from "react";
-import { PageHead, Banner, FieldLabel, inputCls } from "../ui";
-import { UploadIcon } from "../../../components/Icons";
-import { fetchPortfolio, type PortfolioData } from "../../../lib/api";
-import { isSupabaseConfigured, loadSupabase } from "../../../lib/supabase/browser";
-import { readDemoUploads, DEMO_UPLOADS_KEY, type DemoUpload } from "../dashboard/page";
+import { useEffect, useRef, useState, type DragEvent } from "react";
+import { PageHead } from "../ui";
+import { UploadIcon, CheckIcon } from "../../../components/Icons";
+import { fetchPortfolio, uploadPhoto, type PortfolioData } from "../../../lib/api";
 
-/** /admin/upload — загрузка кадра: файл → превью → EXIF → Supabase (или демо). */
+const inputCls =
+  "w-full border border-line bg-coal px-4 py-2.5 font-mono text-sm text-ink outline-none transition-colors duration-300 placeholder:text-mut/50 focus:border-acc";
+const labelCls = "mb-2 block font-mono text-[9px] uppercase tracking-[0.25em] text-mut";
+
+const ACCEPTED = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif"];
+
+/** /admin/upload — загрузка кадра: файл + проект + EXIF → локальное хранилище. */
 export default function AdminUploadPage() {
   const [data, setData] = useState<PortfolioData | null>(null);
   const [file, setFile] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string | null>(null);
-  const [dims, setDims] = useState<{ w: number; h: number } | null>(null);
-  const [dragOver, setDragOver] = useState(false);
-
+  const [preview, setPreview] = useState<{ url: string; width: number; height: number } | null>(null);
   const [projectId, setProjectId] = useState("");
-  const [camera, setCamera] = useState("");
-  const [lens, setLens] = useState("");
-  const [settings, setSettings] = useState("");
-  const [sortOrder, setSortOrder] = useState(1);
-
-  const [busy, setBusy] = useState(false);
+  const [exif, setExif] = useState({ camera: "Canon R8", lens: "", settings: "" });
+  const [dragOver, setDragOver] = useState(false);
+  const [status, setStatus] = useState<"idle" | "saving" | "done">("idle");
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
-  const [sessionUploads, setSessionUploads] = useState<DemoUpload[]>([]);
+  const [savedUrl, setSavedUrl] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     let cancelled = false;
     fetchPortfolio().then((d) => {
-      if (cancelled) return;
-      setData(d);
-      if (d.projects.length && !projectId) setProjectId(d.projects[0].id);
+      if (!cancelled) setData(d);
     });
-    setSessionUploads(readDemoUploads());
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /* Чтение файла: тип + реальные размеры для width/height в БД */
+  /* Принять файл: проверка типа/размера + превью с реальными размерами */
   const acceptFile = (f: File) => {
     setError(null);
-    setSuccess(null);
-    if (!f.type.startsWith("image/")) {
-      setError("Можно загружать только изображения");
+    if (!ACCEPTED.includes(f.type)) {
+      setError("Поддерживаются jpeg, png, webp, gif, avif");
+      return;
+    }
+    if (f.size > 25 * 1024 * 1024) {
+      setError("Файл больше 25 МБ");
       return;
     }
     const url = URL.createObjectURL(f);
     const img = new Image();
-    img.onload = () => {
-      setFile(f);
-      setPreview(url);
-      setDims({ w: img.naturalWidth, h: img.naturalHeight });
-    };
-    img.onerror = () => setError("Не удалось прочитать изображение");
+    img.onload = () => setPreview({ url, width: img.naturalWidth, height: img.naturalHeight });
     img.src = url;
+    setFile(f);
+    setStatus("idle");
   };
 
   const onDrop = (e: DragEvent) => {
@@ -65,86 +58,31 @@ export default function AdminUploadPage() {
     if (f) acceptFile(f);
   };
 
-  const onSubmit = async (e: FormEvent) => {
-    e.preventDefault();
+  const submit = async () => {
+    if (!file || !projectId) return;
     setError(null);
-    setSuccess(null);
-    if (!file || !dims) {
-      setError("Сначала выберите файл кадра");
-      return;
-    }
-    if (!projectId) {
-      setError("Выберите проект для кадра");
-      return;
-    }
-    setBusy(true);
-
-    const row = {
-      project_id: projectId,
-      width: dims.w,
-      height: dims.h,
-      exif_camera: camera.trim() || null,
-      exif_lens: lens.trim() || null,
-      exif_settings: settings.trim() || null,
-      sort_order: sortOrder,
-    };
-
-    const supabase = await loadSupabase();
-    if (supabase) {
-      /* Боевой режим: файл → Storage, строка → photos */
-      const path = `${Date.now()}-${file.name.replace(/\s+/g, "-")}`;
-      const { error: upErr } = await supabase.storage.from("photos").upload(path, file);
-      if (upErr) {
-        setBusy(false);
-        setError(`Storage: ${upErr.message}`);
-        return;
-      }
-      const { data: pub } = supabase.storage.from("photos").getPublicUrl(path);
-      const { error: insErr } = await supabase
-        .from("photos")
-        .insert({ ...row, image_url: pub.publicUrl });
-      setBusy(false);
-      if (insErr) {
-        setError(`Insert: ${insErr.message}`);
-        return;
-      }
-      setSuccess("Кадр загружен в Supabase и добавлен в проект");
-    } else {
-      /* Демо: миниатюра в localStorage, чтобы дашборд её показал */
-      let thumb: string | null = null;
-      if (file.size < 1.5 * 1024 * 1024) {
-        thumb = await new Promise<string | null>((resolve) => {
-          const r = new FileReader();
-          r.onload = () => resolve(typeof r.result === "string" ? r.result : null);
-          r.onerror = () => resolve(null);
-          r.readAsDataURL(file);
-        });
-      }
-      const entry: DemoUpload = {
-        id: `up-${Date.now()}`,
-        name: file.name,
-        thumb,
+    setStatus("saving");
+    try {
+      const res = await uploadPhoto(file, {
         project_id: projectId,
-        created: new Date().toISOString(),
-      };
-      const list = [entry, ...readDemoUploads()].slice(0, 12);
-      localStorage.setItem(DEMO_UPLOADS_KEY, JSON.stringify(list));
-      setSessionUploads(list);
-      await new Promise((r) => setTimeout(r, 600));
-      setBusy(false);
-      setSuccess("Кадр принят (демо-режим): Supabase не подключён, запись не ушла в БД");
+        exif_camera: exif.camera.trim() || undefined,
+        exif_lens: exif.lens.trim() || undefined,
+        exif_settings: exif.settings.trim() || undefined,
+        width: preview?.width,
+        height: preview?.height,
+      });
+      setSavedUrl(res.image_url);
+      setStatus("done");
+      /* Сброс формы под следующий кадр */
+      if (preview) URL.revokeObjectURL(preview.url);
+      setFile(null);
+      setPreview(null);
+      setExif({ camera: "Canon R8", lens: "", settings: "" });
+      if (inputRef.current) inputRef.current.value = "";
+    } catch (e) {
+      setStatus("idle");
+      setError(e instanceof Error ? e.message : "Не удалось загрузить файл");
     }
-
-    /* Сброс формы под следующий кадр */
-    setFile(null);
-    if (preview) URL.revokeObjectURL(preview);
-    setPreview(null);
-    setDims(null);
-    setCamera("");
-    setLens("");
-    setSettings("");
-    setSortOrder((s) => s + 1);
-    if (inputRef.current) inputRef.current.value = "";
   };
 
   return (
@@ -152,191 +90,128 @@ export default function AdminUploadPage() {
       <PageHead
         kicker="Тёмная комната · Загрузка"
         title="Загрузка кадра"
-        sub="Кадр привязывается к проекту; EXIF попадёт в бейджи на странице серии."
+        sub="Файл уходит в volume на сервере, строка с EXIF — в базу. jpeg / png / webp / gif / avif, до 25 МБ."
       />
 
-      {!isSupabaseConfigured && (
-        <div className="mb-8">
-          <Banner tone="warn">
-            Демо-режим: файл не уходит в Storage, запись имитируется. Подключите
-            VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY для боевой записи.
-          </Banner>
-        </div>
-      )}
-      {error && (
-        <div className="mb-8">
-          <Banner tone="err">{error}</Banner>
-        </div>
-      )}
-      {success && (
-        <div className="mb-8">
-          <Banner tone="ok">{success}</Banner>
-        </div>
-      )}
-
-      <form onSubmit={onSubmit} className="grid gap-8 lg:grid-cols-2">
-        {/* Drop-zone / превью */}
+      <div className="grid gap-8 lg:grid-cols-2">
+        {/* Дроп-зона */}
         <div>
-          <FieldLabel htmlFor="up-file">Файл кадра</FieldLabel>
-          <div
+          <button
+            type="button"
+            onClick={() => inputRef.current?.click()}
             onDragOver={(e) => {
               e.preventDefault();
               setDragOver(true);
             }}
             onDragLeave={() => setDragOver(false)}
             onDrop={onDrop}
-            onClick={() => inputRef.current?.click()}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") inputRef.current?.click();
-            }}
-            className={`relative flex min-h-[340px] cursor-pointer flex-col items-center justify-center overflow-hidden border-2 border-dashed p-6 transition-all duration-300 ${
+            className={`flex aspect-[4/3] w-full flex-col items-center justify-center gap-4 border border-dashed transition-all duration-300 ${
               dragOver
-                ? "border-acc bg-acc/[0.06]"
-                : preview
-                  ? "border-line bg-panel/40"
-                  : "border-line bg-panel/20 hover:border-acc/60 hover:bg-panel/40"
+                ? "border-acc bg-acc/[0.07] scale-[1.01]"
+                : "border-line bg-panel/40 hover:border-acc/60"
             }`}
           >
-            <input
-              ref={inputRef}
-              id="up-file"
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) acceptFile(f);
-              }}
-            />
-            {preview && dims ? (
+            {preview ? (
               <>
-                <img
-                  src={preview}
-                  alt="Превью загружаемого кадра"
-                  className="lb-in max-h-[420px] w-auto max-w-full object-contain"
-                />
-                <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.2em] text-mut">
-                  {dims.w} × {dims.h} px · {(file?.size ?? 0) > 1024 * 1024
-                    ? `${((file?.size ?? 0) / 1024 / 1024).toFixed(1)} MB`
-                    : `${Math.round((file?.size ?? 0) / 1024)} KB`}
-                </p>
+                <img src={preview.url} alt="Предпросмотр кадра" className="max-h-[280px] max-w-[85%] object-contain" />
+                <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-mut">
+                  {file?.name} · {preview.width}×{preview.height}
+                </span>
               </>
             ) : (
               <>
-                <UploadIcon size={34} className={`transition-colors ${dragOver ? "text-acc" : "text-mut"}`} />
-                <p className="mt-4 font-display text-xl font-semibold">
-                  {dragOver ? "Отпускайте — поймаем" : "Перетащите кадр сюда"}
-                </p>
-                <p className="mt-1.5 font-mono text-[10px] uppercase tracking-[0.22em] text-mut">
-                  или кликните для выбора · JPG / PNG
-                </p>
+                <UploadIcon size={34} className={dragOver ? "text-acc" : "text-mut"} />
+                <span className="font-mono text-[11px] uppercase tracking-[0.25em] text-mut">
+                  Перетащите файл или кликните
+                </span>
               </>
             )}
-          </div>
+          </button>
+          <input
+            ref={inputRef}
+            type="file"
+            accept={ACCEPTED.join(",")}
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) acceptFile(f);
+            }}
+          />
+          {savedUrl && status === "done" && (
+            <div className="fadeup mt-4 flex items-center gap-4 border border-acc/50 bg-acc/[0.06] p-3">
+              <img src={savedUrl} alt="Загруженный кадр" className="h-14 w-14 object-cover" />
+              <div>
+                <p className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-acc">
+                  <CheckIcon size={15} /> Кадр в архиве
+                </p>
+                <p className="mt-1 font-mono text-[9px] uppercase tracking-[0.15em] text-mut">
+                  Можно загружать следующий
+                </p>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Метаданные */}
-        <div className="space-y-6">
+        <div className="space-y-5">
           <div>
-            <FieldLabel htmlFor="up-project">Проект</FieldLabel>
+            <label htmlFor="up-project" className={labelCls}>Проект *</label>
             <select
               id="up-project"
               value={projectId}
               onChange={(e) => setProjectId(e.target.value)}
-              className={`${inputCls} appearance-none`}
+              className={inputCls}
             >
+              <option value="">— выберите проект —</option>
               {(data?.projects ?? []).map((p) => (
-                <option key={p.id} value={p.id} className="bg-coal">
-                  {p.title} · {p.date?.slice(0, 4) ?? "—"}
-                </option>
+                <option key={p.id} value={p.id}>{p.title}</option>
               ))}
             </select>
-          </div>
-          <div className="grid gap-6 sm:grid-cols-2">
-            <div>
-              <FieldLabel htmlFor="up-camera">Камера</FieldLabel>
-              <input
-                id="up-camera"
-                value={camera}
-                onChange={(e) => setCamera(e.target.value)}
-                placeholder="Leica M6"
-                className={inputCls}
-              />
-            </div>
-            <div>
-              <FieldLabel htmlFor="up-lens">Объектив</FieldLabel>
-              <input
-                id="up-lens"
-                value={lens}
-                onChange={(e) => setLens(e.target.value)}
-                placeholder="Summicron 35mm ƒ/2"
-                className={inputCls}
-              />
-            </div>
+            {data && data.projects.length === 0 && (
+              <p className="mt-2 font-mono text-[9px] uppercase tracking-[0.15em] text-err">
+                Сначала создайте проект на странице «Проекты»
+              </p>
+            )}
           </div>
           <div>
-            <FieldLabel htmlFor="up-settings">Настройки (ƒ / выдержка / ISO)</FieldLabel>
-            <input
-              id="up-settings"
-              value={settings}
-              onChange={(e) => setSettings(e.target.value)}
-              placeholder="ƒ/2 · 1/60 · ISO 1600"
-              className={inputCls}
-            />
+            <label htmlFor="up-cam" className={labelCls}>Камера</label>
+            <input id="up-cam" value={exif.camera} onChange={(e) => setExif({ ...exif, camera: e.target.value })} placeholder="Canon R8" className={inputCls} />
           </div>
-          <div className="max-w-[140px]">
-            <FieldLabel htmlFor="up-order">Порядок</FieldLabel>
-            <input
-              id="up-order"
-              type="number"
-              min={1}
-              value={sortOrder}
-              onChange={(e) => setSortOrder(Number(e.target.value) || 1)}
-              className={inputCls}
-            />
+          <div>
+            <label htmlFor="up-lens" className={labelCls}>Объектив</label>
+            <input id="up-lens" value={exif.lens} onChange={(e) => setExif({ ...exif, lens: e.target.value })} placeholder="EF 35mm ƒ/2.0" className={inputCls} />
+          </div>
+          <div>
+            <label htmlFor="up-set" className={labelCls}>Параметры съёмки</label>
+            <input id="up-set" value={exif.settings} onChange={(e) => setExif({ ...exif, settings: e.target.value })} placeholder="ƒ/2.0 · 1/250 · ISO 100" className={inputCls} />
           </div>
 
+          {error && (
+            <div role="alert" className="border border-err/50 bg-err/[0.08] px-4 py-3 text-sm text-err">
+              {error}
+            </div>
+          )}
+
           <button
-            type="submit"
-            disabled={busy}
-            className="group flex w-full items-center justify-center gap-3 border border-ink/50 py-4 font-mono text-[11px] uppercase tracking-[0.3em] text-ink transition-all duration-400 hover:border-acc hover:bg-acc hover:text-coal disabled:cursor-wait disabled:opacity-60 sm:max-w-xs"
+            onClick={submit}
+            disabled={!file || !projectId || status === "saving"}
+            className="flex w-full items-center justify-center gap-3 border border-ink/50 py-3.5 font-mono text-[11px] uppercase tracking-[0.3em] text-ink transition-all duration-400 hover:border-acc hover:bg-acc hover:text-coal disabled:cursor-not-allowed disabled:opacity-40"
           >
-            {busy ? (
+            {status === "saving" ? (
               <>
                 <span className="pulsedot h-1.5 w-1.5 rounded-full bg-current" aria-hidden="true" />
                 Проявляем…
               </>
             ) : (
-              <>
-                <UploadIcon size={16} />
-                {isSupabaseConfigured ? "Загрузить в Supabase" : "Загрузить (демо)"}
-              </>
+              "Загрузить в архив"
             )}
           </button>
+          <p className="font-mono text-[9px] uppercase leading-relaxed tracking-[0.18em] text-mut/70">
+            Ширина и высота считываются из файла автоматически — сетка
+            портфолио соберётся без сдвигов.
+          </p>
         </div>
-      </form>
-
-      {/* Загрузки текущей сессии (демо) */}
-      {sessionUploads.length > 0 && (
-        <div className="mt-14">
-          <h2 className="mb-4 font-display text-xl font-semibold">Загружено в этой сессии</h2>
-          <div className="grid grid-cols-3 gap-3 sm:grid-cols-6">
-            {sessionUploads.map((u) => (
-              <div key={u.id} className="relative aspect-square overflow-hidden border border-line bg-panel">
-                {u.thumb ? (
-                  <img src={u.thumb} alt={u.name} className="h-full w-full object-cover" />
-                ) : (
-                  <div className="flex h-full items-center justify-center p-2 text-center font-mono text-[9px] uppercase tracking-[0.12em] text-mut">
-                    {u.name}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      </div>
     </div>
   );
 }

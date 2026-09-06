@@ -1,5 +1,7 @@
 # Не включаем в build-контекст (ускоряет сборку, не даёт секретам попасть в слои)
 node_modules
+server/node_modules
+server/data
 dist
 .git
 .github

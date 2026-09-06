@@ -1,51 +1,61 @@
-# Docker Compose для Banana Pi M4 Zero (aarch64) и любого Linux-хоста.
+# Полный автономный стек на одноплатнике (Banana Pi M4 Zero и др. ARM64/SBC):
+#   web — nginx: статика + кэшированная отдача /uploads
+#   app — Node: API, SQLite, хранение фото
+# Данные живут в именованном volume `portfolio-data` (БД + загрузки + секрет JWT).
 #
-# Простой запуск (HTTP, локальная сеть / проброс порта):
+# Запуск:
 #   docker compose up -d --build
-#
-# С HTTPS через Caddy (нужен домен):
-#   1) в сервисе web закомментируйте ports "80:80" и раскомментируйте "127.0.0.1:8080:80"
-#   2) раскомментируйте сервис caddy и volumes в конце файла
-#   3) docker compose up -d --build
+#   docker compose logs app            # посмотреть первый email/пароль админки
 
 services:
   web:
     build:
       context: .
-      dockerfile: Dockerfile
-      # Vite встраивает эти переменные в бандл при сборке.
-      # Значения читаются из .env рядом с этим файлом.
-      args:
-        VITE_SUPABASE_URL: ${VITE_SUPABASE_URL:-}
-        VITE_SUPABASE_ANON_KEY: ${VITE_SUPABASE_ANON_KEY:-}
-    image: babanov-portfolio:latest
-    container_name: portfolio-web
-    restart: unless-stopped
+      target: web
     ports:
-      - "80:80"                    # обычный запуск
-      # - "127.0.0.1:8080:80"      # для запуска под Caddy (TLS)
-    logging:
-      driver: json-file
-      options:
-        max-size: "5m"
-        max-file: "3"
+      - "80:80"
+    volumes:
+      - portfolio-data:/data:ro       # nginx отдаёт /uploads напрямую, без прокси
+    depends_on:
+      - app
+    restart: unless-stopped
+    networks:
+      - portfolio
 
-  # ── Опционально: автоматический HTTPS (Let's Encrypt) ─────────────────────
+  app:
+    build:
+      context: .
+      target: app
+    environment:
+      # Учётные данные первого входа (см. docker compose logs app, если пароль сгенерирован)
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@localhost}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+    volumes:
+      - portfolio-data:/data
+    restart: unless-stopped
+    # API доступен только внутри сети compose — снаружи только через nginx
+    networks:
+      - portfolio
+
+  # HTTPS: раскомментируйте, направьте A-запись домена на плату и впишите
+  # домен в deploy/Caddyfile — сертификат Let's Encrypt будет выпущен сам.
   # caddy:
-  #   image: caddy:2-alpine
-  #   container_name: portfolio-proxy
-  #   restart: unless-stopped
+  #   image: caddy:2.10-alpine
   #   ports:
   #     - "80:80"
   #     - "443:443"
-  #     - "443:443/udp"            # HTTP/3
   #   volumes:
   #     - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
-  #     - caddy_data:/data         # сертификаты
-  #     - caddy_config:/config
+  #     - caddy-data:/data
   #   depends_on:
   #     - web
+  #   restart: unless-stopped
+  #   networks:
+  #     - portfolio
 
-# volumes:
-#   caddy_data:
-#   caddy_config:
+volumes:
+  portfolio-data:
+  # caddy-data:
+
+networks:
+  portfolio:
