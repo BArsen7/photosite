@@ -84,7 +84,7 @@ export default function AdminLoginPage() {
         <div className="flex items-center gap-3">
           <LogoMark size={28} className="text-acc" />
           <div>
-            <p className="font-display text-xl font-semibold leading-tight">Артём Волков</p>
+            <p className="font-display text-xl font-semibold leading-tight">Арсений Бабанов</p>
             <p className="font-mono text-[9px] uppercase tracking-[0.3em] text-mut">Фотограф</p>
           </div>
         </div>

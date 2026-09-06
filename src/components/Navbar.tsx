@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
-import { LogoMark, TgIcon, IgIcon, MailIcon } from "./Icons";
+import { LogoMark, TgIcon, VkIcon, MailIcon } from "./Icons";
 import { useLockBody } from "../lib/motion";
 
 const LINKS = [
@@ -10,9 +10,9 @@ const LINKS = [
 ];
 
 const SOCIALS = [
-  { label: "Telegram", href: "https://t.me/volkov_foto", Icon: TgIcon },
-  { label: "Instagram", href: "https://instagram.com/volkov.foto", Icon: IgIcon },
-  { label: "Email", href: "mailto:hello@volkov.photo", Icon: MailIcon },
+  { label: "Telegram", href: "https://t.me/BArsen7", Icon: TgIcon },
+  { label: "ВКонтакте", href: "https://vk.com/arsen27", Icon: VkIcon },
+  { label: "Email", href: "mailto:arseniy.babanov@yandex.ru", Icon: MailIcon },
 ];
 
 /** Минималистичная шапка: логотип слева, навигация справа.
@@ -43,12 +43,12 @@ export default function Navbar() {
           <Link
             to="/"
             className="group flex items-center gap-3"
-            aria-label="Артём Волков — на главную"
+            aria-label="Арсений Бабанов — на главную"
             onClick={() => setOpen(false)}
           >
             <LogoMark size={26} className="text-acc transition-transform duration-500 group-hover:rotate-90" />
             <span className="font-display text-lg font-semibold tracking-wide">
-              Артём Волков
+              Арсений Бабанов
             </span>
           </Link>
 

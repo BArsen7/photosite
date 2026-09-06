@@ -2,20 +2,22 @@ import SectionHead from "./SectionHead";
 import { Reveal } from "../lib/motion";
 import { ArrowUpRight } from "./Icons";
 
+/* Демо-данные: Арсений подставит реальные выставки и дипломы. */
 const SHOWS: Array<[string, string, string]> = [
-  ["2025", "«Тишина города»", "Галерея «Среда», Москва · персональная"],
-  ["2024", "«Бетон и свет»", "Севкабель Порт, Санкт-Петербург"],
+  ["2025", "«Тишина города»", "Галерея «Среда», Москва"],
+  ["2024", "«Бетон и свет»", "Artplay, Москва"],
   ["2023", "«Люди в пути»", "ЦСИ «Винзавод», Москва"],
   ["2022", "«Север. Оттепель»", "Арт-резиденция «Сияние», Мурманск"],
   ["2021", "«Двенадцать остановок»", "Фотоклуб «Пространство», Казань"],
+  ["2019", "«Первые кадры»", "Фотоклуб «Смена», Москва"],
 ];
 
-const PRESS: Array<[string, string, string]> = [
-  ["2025", "Bird in Flight", "Портфолио-ревю недели"],
-  ["2024", "Афиша Daily", "«10 уличных фотографов, за которыми стоит ходить»"],
-  ["2023", "Digital Photo", "Интервью о плёночной дисциплине"],
-  ["2022", "Photar", "Разбор серии «Север. Оттепель»"],
-  ["2021", "35photo.pro", "Автор недели"],
+const AWARDS: Array<[string, string, string]> = [
+  ["2025", "Диплом лауреата", "Открытый конкурс уличной фотографии"],
+  ["2024", "Диплом лауреата", "Фотоконкурс «Город и люди»"],
+  ["2023", "Специальный приз", "Конкурс архитектурной фотографии"],
+  ["2022", "Диплом лауреата", "Открытый конкурс пейзажной фотографии"],
+  ["2021", "Шорт-лист", "Молодёжный фотоконкурс «Перспектива»"],
 ];
 
 function Row({ year, title, note, delay }: { year: string; title: string; note: string; delay: number }) {
@@ -38,11 +40,11 @@ function Row({ year, title, note, delay }: { year: string; title: string; note: 
 export default function Exhibitions() {
   return (
     <section id="exhibitions" className="scroll-mt-20 border-t border-line px-5 py-20 md:px-10 md:py-28">
-      <SectionHead no="05 — Признание" title="Выставки и пресса" note="Избранное за пять лет" />
+      <SectionHead no="05 — Признание" title="Выставки и конкурсы" note="Избранное с 2018 года" />
 
       <div className="grid gap-14 lg:grid-cols-2 lg:gap-20">
         <div>
-          <p className="mb-6 font-mono text-[11px] uppercase tracking-[0.35em] text-acc">Выставки</p>
+          <p className="mb-6 font-mono text-[11px] uppercase tracking-[0.35em] text-acc">Выставки · 6</p>
           <div className="border-t border-line">
             {SHOWS.map(([y, t, n], i) => (
               <Row key={t} year={y} title={t} note={n} delay={i * 60} />
@@ -50,10 +52,10 @@ export default function Exhibitions() {
           </div>
         </div>
         <div>
-          <p className="mb-6 font-mono text-[11px] uppercase tracking-[0.35em] text-acc">Публикации</p>
+          <p className="mb-6 font-mono text-[11px] uppercase tracking-[0.35em] text-acc">Конкурсы и дипломы</p>
           <div className="border-t border-line">
-            {PRESS.map(([y, t, n], i) => (
-              <Row key={t} year={y} title={t} note={n} delay={i * 60} />
+            {AWARDS.map(([y, t, n], i) => (
+              <Row key={`${t}-${y}`} year={y} title={t} note={n} delay={i * 60} />
             ))}
           </div>
         </div>

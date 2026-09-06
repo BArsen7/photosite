@@ -19,7 +19,7 @@ export const FEATURED_PROJECTS: Project[] = [
     year: 2025,
     location: "Москва",
     description:
-      "Ночные улицы, дождь и неон. Город, который говорит шёпотом, — снят на плёнку за один январский вечер.",
+      "Ночные улицы, дождь и неон. Город, который говорит шёпотом, — снят за один январский вечер.",
     cover:
       "https://image.qwenlm.ai/generated-images/63cfecc5-6791-4b6d-9663-2a53c23d3f09/_result.png",
   },
@@ -41,7 +41,7 @@ export const FEATURED_PROJECTS: Project[] = [
     year: 2023,
     location: "Кавказ",
     description:
-      "Хребты в тумане на рассвете. Тишина, снятая на средний формат, — и ни одного лишнего кадра.",
+      "Хребты в тумане на рассвете. Тишина, пойманная на длинной выдержке, — и ни одного лишнего кадра.",
     cover:
       "https://image.qwenlm.ai/generated-images/e9fd5f54-7555-4ba4-b69f-39ec8c44f1f5/_result.png",
   },

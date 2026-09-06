@@ -110,6 +110,14 @@ export function IgIcon({ size, className }: IconProps) {
   );
 }
 
+export function VkIcon({ size, className }: IconProps) {
+  return (
+    <svg {...base(size, className)}>
+      <path d="M3.5 7h2.4c.7 4.6 2.8 6.6 4.1 6.9V7h2.3v2.9c1.3-.14 2.7-1.6 3.2-2.9h2.3c-.4 1.6-1.9 3.1-2.9 3.7 1 .5 2.7 1.8 3.4 3.8h-2.6c-.5-1.7-1.9-3-3.4-3.2v3.2h-.3c-5 0-8.1-3.4-8.5-7.5Z" />
+    </svg>
+  );
+}
+
 export function CheckIcon({ size, className }: IconProps) {
   return (
     <svg {...base(size, className)}>

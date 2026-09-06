@@ -3,48 +3,44 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Арсений Бабанов — фотограф</title>
     <meta
       name="description"
-      content="Артём Волков — фотограф. Стрит, портрет, архитектура, натюрморт и пейзаж. Люблю свет и ловлю моменты."
+      content="Арсений Бабанов — фотограф. Портрет, улица, архитектура, натюрморт, пейзаж и ЧБ. Ищу свет и ловлю моменты."
     />
     <meta name="theme-color" content="#0f0f0f" />
+    <link rel="canonical" href="https://babanov.photo/" />
 
-    <!-- OpenGraph: дефолты для краулеров, не выполняющих JS;
-         на клиентах обновляются динамически (lib/meta.ts) -->
+    <!-- OpenGraph: дефолты для краулеров, которые не исполняют JS -->
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="Артём Волков — фотограф" />
+    <meta property="og:site_name" content="Арсений Бабанов — фотограф" />
     <meta property="og:locale" content="ru_RU" />
-    <meta property="og:title" content="Артём Волков — фотограф" />
+    <meta property="og:title" content="Арсений Бабанов — фотограф" />
     <meta
       property="og:description"
-      content="Стрит, портрет, архитектура, натюрморт и пейзаж. Люблю свет и ловлю моменты."
+      content="Портрет, улица, архитектура, пейзаж, натюрморт и ЧБ. Москва."
     />
     <meta
       property="og:image"
       content="https://image.qwenlm.ai/generated-images/63cfecc5-6791-4b6d-9663-2a53c23d3f09/_result.png"
     />
+    <meta name="twitter:card" content="summary_large_image" />
 
-    <title>Артём Волков — фотограф</title>
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d0a04c' stroke-width='1.5'%3E%3Cpath d='M3 3h5M3 3v5M21 3h-5M21 3v5M3 21h5M3 21v-5M21 21h-5M21 21v-5'/%3E%3Ccircle cx='12' cy='12' r='5.2'/%3E%3C/svg%3E"
+    />
 
     <!-- Шрифты: Playfair Display (заголовки) + Inter (текст) + JetBrains Mono (служебные подписи) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
-
-    <style>
-      /* Тёмная тема до загрузки бандла — без белой вспышки */
-      html,
-      body {
-        margin: 0;
-        background-color: #0f0f0f;
-        color: #e0e0e0;
-      }
-    </style>
   </head>
-  <body>
+  <body style="background: #0f0f0f">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

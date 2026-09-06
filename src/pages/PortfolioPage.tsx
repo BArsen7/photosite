@@ -110,7 +110,7 @@ export default function PortfolioPage() {
   usePageMeta({
     title: "Портфолио",
     description:
-      "Все работы Артёма Волкова: стрит, портреты, архитектура, натюрморт и пейзаж. Фильтры по жанрам, EXIF каждого кадра.",
+      "Все работы Арсения Бабанова: портреты, улица, архитектура, натюрморт, пейзаж и чёрно-белые серии. Фильтры по жанрам, EXIF каждого кадра.",
     image: sortedPhotos[0]?.image_url,
   });
 
@@ -119,13 +119,13 @@ export default function PortfolioPage() {
       {/* Шапка страницы */}
       <section className="px-5 md:px-10">
         <p className="mb-4 font-mono text-[11px] uppercase tracking-[0.35em] text-acc">
-          Артём Волков · избранные кадры · 2021—2025
+          Арсений Бабанов · избранные кадры · с 2018 года
         </p>
         <h1 className="font-display text-[clamp(2.8rem,8vw,6rem)] font-semibold leading-none tracking-tight">
           <LineReveal>Портфолио</LineReveal>
         </h1>
         <p className="mt-5 max-w-xl text-sm leading-relaxed text-mut md:text-base">
-          Пять жанров, два формата — плёнка и цифровой средний формат. Каждый кадр
+          Шесть жанров — от уличных сцен до чёрно-белой графики. Каждый кадр
           открывается по клику: внутри EXIF и паспорт проекта.
         </p>
       </section>
