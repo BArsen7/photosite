@@ -1,0 +1,51 @@
+# Docker Compose для Banana Pi M4 Zero (aarch64) и любого Linux-хоста.
+#
+# Простой запуск (HTTP, локальная сеть / проброс порта):
+#   docker compose up -d --build
+#
+# С HTTPS через Caddy (нужен домен):
+#   1) в сервисе web закомментируйте ports "80:80" и раскомментируйте "127.0.0.1:8080:80"
+#   2) раскомментируйте сервис caddy и volumes в конце файла
+#   3) docker compose up -d --build
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      # Vite встраивает эти переменные в бандл при сборке.
+      # Значения читаются из .env рядом с этим файлом.
+      args:
+        VITE_SUPABASE_URL: ${VITE_SUPABASE_URL:-}
+        VITE_SUPABASE_ANON_KEY: ${VITE_SUPABASE_ANON_KEY:-}
+    image: babanov-portfolio:latest
+    container_name: portfolio-web
+    restart: unless-stopped
+    ports:
+      - "80:80"                    # обычный запуск
+      # - "127.0.0.1:8080:80"      # для запуска под Caddy (TLS)
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"
+
+  # ── Опционально: автоматический HTTPS (Let's Encrypt) ─────────────────────
+  # caddy:
+  #   image: caddy:2-alpine
+  #   container_name: portfolio-proxy
+  #   restart: unless-stopped
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #     - "443:443/udp"            # HTTP/3
+  #   volumes:
+  #     - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+  #     - caddy_data:/data         # сертификаты
+  #     - caddy_config:/config
+  #   depends_on:
+  #     - web
+
+# volumes:
+#   caddy_data:
+#   caddy_config:

@@ -49,11 +49,16 @@ npm run preview
 
 ## Деплой
 
-Подробная пошаговая инструкция — в [**DEPLOY.md**](./DEPLOY.md): настройка
-Supabase (схема, RLS, Storage, первый админ), переменные окружения,
-развёртывание на Vercel / Netlify / Cloudflare Pages / GitHub Pages / VPS
-и финальный чек-лист. Кратко: `npm run build` → папка `dist/` → любой
-статический хостинг (HashRouter не требует серверных rewrite).
+- Облачные и статические хостинги (Vercel / Netlify / Cloudflare Pages /
+  GitHub Pages / VPS) — [**DEPLOY.md**](./DEPLOY.md): настройка Supabase
+  (схема, RLS, Storage, первый админ), переменные окружения, чек-лист.
+- **Docker на SBC (Banana Pi M4 Zero и др. aarch64)** —
+  [**DEPLOY-DOCKER.md**](./DEPLOY-DOCKER.md): `Dockerfile` (node → nginx,
+  ~45 МБ), `docker-compose.yml`, nginx/Caddy-конфиги, HTTPS, обновление.
+  Быстрый старт на плате: `docker compose up -d --build`.
+
+Кратко: `npm run build` → папка `dist/` → любой статический хостинг
+(HashRouter не требует серверных rewrite).
 
 ### Вход в админку (демо-режим)
 

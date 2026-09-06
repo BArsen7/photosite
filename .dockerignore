@@ -1,0 +1,12 @@
+# Не включаем в build-контекст (ускоряет сборку, не даёт секретам попасть в слои)
+node_modules
+dist
+.git
+.github
+.env
+.env.*
+*.log
+*.md
+!README.md
+DEPLOY*.md
+.DS_Store
