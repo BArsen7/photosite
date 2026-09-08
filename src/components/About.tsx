@@ -26,7 +26,7 @@ const GEAR = [
 export default function About() {
   return (
     <section id="about" className="scroll-mt-20 border-t border-line px-5 py-20 md:px-10 md:py-28">
-      <SectionHead no="03 — Обо мне" title="Арсений Бабанов" note="Москва · с 2018 года\nCanon R8" />
+      <SectionHead no="03 — Обо мне" title="Арсений Бабанов" note="Москва · с 2018 года" />
 
       <div className="grid gap-12 lg:grid-cols-12">
         {/* Sticky-колонка */}

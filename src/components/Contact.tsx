@@ -95,7 +95,7 @@ export default function Contact() {
           <Reveal delay={200} className="mt-12 inline-flex items-center gap-3 border border-line px-5 py-3">
             <span className="pulsedot h-2 w-2 rounded-full bg-acc" />
             <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-ink/80">
-              Открыт для съёмок · весна—лето 2026
+              Открыт для съёмок
             </span>
           </Reveal>
         </div>
