@@ -171,7 +171,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({
   storage,
-  limits: { fileSize: 25 * 1024 * 1024 }, // 25 МБ на кадр
+  limits: { fileSize: 100 * 1024 * 1024 }, // 100 МБ на кадр
   fileFilter: (_req, file, cb) => cb(null, ALLOWED_TYPES.has(file.mimetype)),
 });
 
@@ -296,7 +296,7 @@ app.delete("/api/admin/projects/:id", requireAdmin, (req, res) => {
 
 /* ── Админка: кадры ───────────────────────────────────────────────────── */
 app.post("/api/admin/photos", requireAdmin, upload.single("file"), (req, res) => {
-  if (!req.file) return res.status(400).json({ error: "Файл не получен (jpeg/png/webp/gif/avif, до 25 МБ)" });
+  if (!req.file) return res.status(400).json({ error: "Файл не получен (jpeg/png/webp/gif/avif, до 100 МБ)" });
   const { project_id, exif_camera, exif_lens, exif_settings, width, height } = req.body || {};
   if (!project_id) {
     fs.promises.unlink(req.file.path).catch(() => {});
