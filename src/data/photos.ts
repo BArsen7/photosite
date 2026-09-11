@@ -5,7 +5,8 @@ export type Genre =
   | "architecture"
   | "still"
   | "landscape"
-  | "bw";
+  | "bw"
+  | "wildlife";
 
 export interface GenreMeta {
   id: Genre;
@@ -20,6 +21,7 @@ export const GENRES: GenreMeta[] = [
   { id: "still",        en: "Still Life",   ru: "Натюрморт" },
   { id: "landscape",    en: "Landscape",    ru: "Пейзаж" },
   { id: "bw",           en: "Black & White", ru: "Чёрно-белое" },
+  { id: "wildlife",     en: "Wildlife",     ru: "Животный мир" },
 ];
 
 export interface Photo {
